@@ -24,10 +24,10 @@ export function AddToShopSheet({
   // Reset each time the sheet opens: staples start unticked.
   useEffect(() => {
     if (!open) return
-    setPortions(planEntry?.portions ?? 4)
+    setPortions(planEntry?.portions ?? recipe.servings ?? 4)
     setSelected(parsed.map(p => !isStaple(p.name, household.staples)))
     setBusy(false)
-  }, [open, parsed, household.staples, planEntry])
+  }, [open, parsed, household.staples, planEntry, recipe.servings])
 
   const confirm = async () => {
     setBusy(true)

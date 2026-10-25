@@ -6,25 +6,33 @@ import { Tabs } from '../components/Tabs'
 import { CATEGORY_BY_ID, categorise } from '../lib/categories'
 import { parseIngredient } from '../lib/ingredients'
 import { isStaple } from '../lib/list'
+import { useWakeLock } from '../lib/wakeLock'
 import type { Household, PlanEntry, Recipe } from '../types'
 
 const STEP_COLOURS = ['var(--coral)', 'var(--grape)', 'var(--sky)', 'var(--mint)', 'var(--orange)', 'var(--pink)']
 
 export function RecipeDetail({
-  recipe, household, planEntry, onBack, onEdit, onDelete, onAddToShop, onToggleStaple,
+  recipe, household, planEntry, fromWeek, onBack, onEdit, onDelete, onAddToShop, onRemoveFromShop, onCooked, onToggleStaple,
 }: {
   recipe: Recipe
   household: Household
   planEntry: PlanEntry | undefined
+  fromWeek: boolean
   onBack: () => void
   onEdit: () => void
   onDelete: () => void
   onAddToShop: () => void
+  onRemoveFromShop: () => void
+  onCooked: () => void
   onToggleStaple: (name: string, staple: boolean) => void
 }) {
   const [tab, setTab] = useState<'ingredients' | 'steps'>('ingredients')
   const [done, setDone] = useState<Set<number>>(new Set())
   const [menu, setMenu] = useState(false)
+  // Screen stays on while following the steps, so it doesn't lock mid-recipe.
+  useWakeLock(tab === 'steps')
+  const inShop = !!planEntry && planEntry.itemIds.length > 0
+  const cookNow = fromWeek && !!planEntry
   const host = (() => {
     try { return recipe.sourceUrl ? new URL(recipe.sourceUrl).hostname.replace(/^www\./, '') : null } catch { return null }
   })()
@@ -62,7 +70,7 @@ export function RecipeDetail({
         ))}
         {recipe.servings && <span className="chip">🍽️ Serves {recipe.servings}</span>}
         {host && <a className="chip" href={recipe.sourceUrl!} target="_blank" rel="noreferrer">🔗 {host}</a>}
-        {planEntry && <span className="chip" style={{ background: 'var(--mint)', color: '#fff', boxShadow: '0 3px 0 #2aa955' }}>🛒 In shop · {planEntry.portions} portions</span>}
+        {inShop && <span className="chip" style={{ background: 'var(--mint)', color: '#fff', boxShadow: '0 3px 0 #2aa955' }}>🛒 In shop · {planEntry.portions} portions</span>}
       </div>
 
       <Tabs
@@ -121,11 +129,24 @@ export function RecipeDetail({
         )}
       </AnimatePresence>
 
+      {(cookNow || inShop) && (
+        <div className="row" style={{ justifyContent: 'center', marginTop: 18, flexWrap: 'wrap' }}>
+          {cookNow && <button className="btn small ghost" onClick={onAddToShop}>🛒 {inShop ? 'Update in shop' : 'Add to shop'}</button>}
+          {inShop && <button className="btn small ghost danger" onClick={onRemoveFromShop}>Remove from shop</button>}
+        </div>
+      )}
+
       <div style={{ height: 80 }} />
       <div className="sticky-cta">
-        <motion.button className="btn block" onClick={onAddToShop} whileTap={{ scale: 0.97 }} initial={{ y: 80 }} animate={{ y: 0 }} transition={{ type: 'spring', delay: 0.2 }}>
-          🛒 {planEntry ? 'Update in shop' : 'Add to shop'}
-        </motion.button>
+        {cookNow ? (
+          <motion.button className="btn block mint" onClick={onCooked} whileTap={{ scale: 0.97 }} initial={{ y: 80 }} animate={{ y: 0 }} transition={{ type: 'spring', delay: 0.2 }}>
+            🍳 Cooked!
+          </motion.button>
+        ) : (
+          <motion.button className="btn block" onClick={onAddToShop} whileTap={{ scale: 0.97 }} initial={{ y: 80 }} animate={{ y: 0 }} transition={{ type: 'spring', delay: 0.2 }}>
+            🛒 {inShop ? 'Update in shop' : 'Add to shop'}
+          </motion.button>
+        )}
       </div>
     </motion.div>
   )

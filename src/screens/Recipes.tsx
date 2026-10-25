@@ -20,7 +20,7 @@ export function Recipes({
   settingsAlert: boolean
 }) {
   const [search, setSearch] = useState('')
-  const inShop = useMemo(() => new Set(plan.map(p => p.id)), [plan])
+  const inShop = useMemo(() => new Set(plan.filter(p => !p.cooked && p.itemIds.length > 0).map(p => p.recipeId)), [plan])
   const labels = household.recipeLabels
   const counts = useMemo(() => {
     const c: Record<string, number> = { [ALL]: recipes?.length ?? 0 }

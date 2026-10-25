@@ -7,7 +7,8 @@ import { useConfetti } from './components/Confetti'
 import { useToast } from './components/Toast'
 import { addStaple, removeStaple, useAuth, useHousehold, useInvites } from './data/household'
 import { createRecipe, deleteRecipe, updateRecipe, useRecipes } from './data/recipes'
-import { addRecipeToShop, removeRecipeFromShop, useItems, usePlan } from './data/shop'
+import { addRecipeToShop, deleteMeals, restoreSnapshot, setCooked, useItems, usePlan } from './data/shop'
+import { openMealFor, toISODate } from './lib/week'
 import { AddRecipeSheet } from './screens/AddRecipeSheet'
 import { AddToShopSheet } from './screens/AddToShopSheet'
 import { LabelsSheet } from './screens/LabelsSheet'
@@ -23,7 +24,7 @@ import type { Household, RecipeDraft } from './types'
 type Route =
   | { name: Tab }
   | { name: 'settings' }
-  | { name: 'recipe'; id: string }
+  | { name: 'recipe'; id: string; fromWeek?: boolean }
   | { name: 'edit'; id?: string; draft: RecipeDraft; warning?: string }
 
 // Each screen change is pushed to browser history so the phone's back gesture works.
@@ -72,7 +73,8 @@ function SignedIn({ user, household }: { user: User; household: Household }) {
   const invites = useInvites(user, household.id)
   const openSettings = () => go({ name: 'settings' })
   const recipe = route.name === 'recipe' ? recipes?.find(r => r.id === route.id) : undefined
-  const planEntry = recipe ? plan.find(p => p.id === recipe.id) : undefined
+  // The recipe's uncooked meal, if any. Cooked meals are history and don't count.
+  const planEntry = recipe ? openMealFor(plan, recipe.id) : undefined
   const unchecked = items?.filter(i => !i.checked).length ?? 0
 
   const toggleStaple = async (name: string, staple: boolean) => {
@@ -112,15 +114,29 @@ function SignedIn({ user, household }: { user: User; household: Household }) {
               recipe={recipe}
               household={household}
               planEntry={planEntry}
+              fromWeek={route.name === 'recipe' && !!route.fromWeek}
               onBack={back}
               onEdit={() => go({ name: 'edit', id: recipe.id, draft: recipe })}
               onDelete={async () => {
-                if (planEntry) await removeRecipeFromShop(household, planEntry)
+                // Cooked meals stay in the week history; they carry their own title and image.
+                if (planEntry) await deleteMeals(household, [planEntry])
                 await deleteRecipe(household.id, recipe.id)
                 toast('Recipe deleted')
                 go({ name: 'recipes' }, true)
               }}
               onAddToShop={() => setShopping(true)}
+              onRemoveFromShop={async () => {
+                if (!planEntry) return
+                const snap = await deleteMeals(household, [planEntry])
+                toast(`Removed ${recipe.title}`, { label: 'Undo', onClick: () => restoreSnapshot(household.id, snap) })
+              }}
+              onCooked={async () => {
+                if (!planEntry) return
+                await setCooked(household.id, planEntry, true, toISODate(new Date()))
+                confetti()
+                toast(`👩‍🍳 ${recipe.title} cooked`)
+                back()
+              }}
               onToggleStaple={toggleStaple}
             />
           ) : recipes ? (
@@ -169,7 +185,7 @@ function SignedIn({ user, household }: { user: User; household: Household }) {
             household={household}
             plan={plan}
             recipes={recipes}
-            onOpenRecipe={id => go({ name: 'recipe', id })}
+            onOpenRecipe={id => go({ name: 'recipe', id, fromWeek: true })}
             onBrowse={() => go({ name: 'recipes' })}
             onSettings={openSettings}
             settingsAlert={invites.length > 0}
@@ -205,7 +221,7 @@ function SignedIn({ user, household }: { user: User; household: Household }) {
           household={household}
           planEntry={planEntry}
           onConfirm={async (portions, ingredients) => {
-            await addRecipeToShop(household, recipe, portions, ingredients)
+            await addRecipeToShop(household, recipe, portions, ingredients, planEntry)
             setShopping(false)
             confetti()
             toast(`🛒 ${recipe.title} added for ${portions}`)
