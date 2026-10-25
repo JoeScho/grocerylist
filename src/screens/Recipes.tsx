@@ -30,10 +30,12 @@ export function Recipes({
   const filtered = useMemo(() => {
     if (!recipes) return recipes
     const q = search.trim().toLowerCase()
-    return recipes.filter(r =>
-      (label === ALL || r.labels.includes(label)) &&
-      (!q || r.title.toLowerCase().includes(q) || r.ingredients.some(i => i.toLowerCase().includes(q))),
-    )
+    return recipes
+      .filter(r =>
+        (label === ALL || r.labels.includes(label)) &&
+        (!q || r.title.toLowerCase().includes(q) || r.ingredients.some(i => i.toLowerCase().includes(q))),
+      )
+      .sort((a, b) => a.title.localeCompare(b.title, 'en-GB', { sensitivity: 'base', numeric: true }))
   }, [recipes, search, label])
 
   return (
