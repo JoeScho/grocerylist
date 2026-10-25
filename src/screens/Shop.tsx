@@ -1,6 +1,8 @@
 import { AnimatePresence, LayoutGroup, motion } from 'motion/react'
-import { useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Celebration } from '../components/Celebration'
 import { Check } from '../components/Check'
+import { useConfetti } from '../components/Confetti'
 import { RecipeImage } from '../components/RecipeImage'
 import { SettingsButton } from '../components/SettingsButton'
 import { Sheet } from '../components/Sheet'
@@ -30,6 +32,24 @@ export function Shop({
   const [text, setText] = useState('')
   const [editing, setEditing] = useState<ShopItem | null>(null)
   const recipeById = useMemo(() => new Map((recipes ?? []).map(r => [r.id, r])), [recipes])
+  const confetti = useConfetti()
+  const [celebrating, setCelebrating] = useState(false)
+  const endCelebration = useCallback(() => setCelebrating(false), [])
+
+  // Celebrate the moment the last item gets ticked, not when opening a list that's already done.
+  const wasComplete = useRef<boolean | null>(null)
+  useEffect(() => {
+    if (!items) return
+    const complete = items.length > 0 && items.every(i => i.checked)
+    if (complete && wasComplete.current === false) {
+      setCelebrating(true)
+      confetti()
+      const t = window.setTimeout(confetti, 700)
+      wasComplete.current = complete
+      return () => window.clearTimeout(t)
+    }
+    wasComplete.current = complete
+  }, [items, confetti])
 
   const groups = useMemo(() => {
     if (!items) return []
@@ -161,6 +181,8 @@ export function Shop({
           </button>
         </div>
       )}
+
+      <Celebration show={celebrating} onDone={endCelebration} />
 
       <Sheet open={!!editing} onClose={() => setEditing(null)}>
         {editing && (
