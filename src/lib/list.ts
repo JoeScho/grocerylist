@@ -52,3 +52,13 @@ export function isStaple(name: string, staples: string[]): boolean {
   const n = name.toLowerCase()
   return staples.some(s => n === s || n.endsWith(' ' + s))
 }
+
+// The manual part of an item is whatever makes the line add up to the total the user asked for.
+export function manualQtyForTotal(item: ItemQuantities, total: number): number {
+  const fromRecipes = Object.values(item.contributions).reduce<number>((sum, v) => sum + (typeof v === 'number' ? v : 0), 0)
+  return Math.max(total, 0) - fromRecipes
+}
+
+export function qtyStep(unit: string | null): number {
+  return unit === 'g' || unit === 'ml' ? 50 : 1
+}

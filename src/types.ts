@@ -39,10 +39,13 @@ export interface ShopItem {
 }
 
 export interface PlanEntry {
-  id: string // recipe id
+  id: string // meal id; older meals use the recipe id
+  recipeId: string
   title: string
   image: string | null
   portions: number
-  itemIds: string[]
+  itemIds: string[] // empty once the meal's ingredients have left the list
   cooked: boolean
+  day: string | null // YYYY-MM-DD
+  cookedAt: Timestamp | null
 }

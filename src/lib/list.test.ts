@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { isStaple, itemKey, recipeContributions, totalQty } from './list'
+import { isStaple, itemKey, manualQtyForTotal, qtyStep, recipeContributions, totalQty } from './list'
 
 describe('recipeContributions', () => {
   it('scales to portions and converts to base units', () => {
@@ -36,5 +36,25 @@ describe('isStaple', () => {
     expect(isStaple('salt', staples)).toBe(true)
     expect(isStaple('extra virgin olive oil', staples)).toBe(true)
     expect(isStaple('salted butter', staples)).toBe(false)
+  })
+})
+
+describe('manualQtyForTotal', () => {
+  const item = { manual: false, manualQty: null, contributions: { a: 200, b: null } }
+  it('stores the difference from the recipe amounts', () => {
+    expect(manualQtyForTotal(item, 150)).toBe(-50)
+    expect(manualQtyForTotal(item, 300)).toBe(100)
+  })
+  it('never goes below a zero total', () => {
+    expect(manualQtyForTotal(item, -10)).toBe(-200)
+  })
+})
+
+describe('qtyStep', () => {
+  it('steps weights and volumes in 50s, everything else in ones', () => {
+    expect(qtyStep('g')).toBe(50)
+    expect(qtyStep('ml')).toBe(50)
+    expect(qtyStep(null)).toBe(1)
+    expect(qtyStep('tbsp')).toBe(1)
   })
 })
