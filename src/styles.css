@@ -234,7 +234,8 @@ label.field > span { display: block; font-weight: 800; font-size: 14px; margin: 
 
 /* Toast */
 .toast-wrap { position: fixed; top: calc(var(--safe-t) + 14px); left: 0; right: 0; display: grid; justify-items: center; z-index: 60; pointer-events: none; }
-.toast { background: var(--ink); color: #fff; padding: 12px 20px; border-radius: 999px; font-weight: 800; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25); max-width: calc(100% - 32px); }
+.toast { background: var(--ink); color: #fff; padding: 12px 20px; border-radius: 999px; font-weight: 800; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25); max-width: calc(100% - 32px); display: flex; align-items: center; gap: 14px; pointer-events: auto; }
+.toast-action { color: var(--sun); font-weight: 900; padding: 4px 2px; text-decoration: underline; text-underline-offset: 3px; }
 
 /* Confetti */
 .confetti { position: fixed; inset: 0; pointer-events: none; z-index: 70; overflow: hidden; }

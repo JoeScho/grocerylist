@@ -1,17 +1,20 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from 'react'
 
-const ToastContext = createContext<(message: string) => void>(() => {})
+interface ToastAction { label: string; onClick: () => void }
+
+const ToastContext = createContext<(message: string, action?: ToastAction) => void>(() => {})
 
 export const useToast = () => useContext(ToastContext)
 
 export function ToastProvider({ children }: { children: ReactNode }) {
-  const [message, setMessage] = useState<{ id: number; text: string } | null>(null)
+  const [message, setMessage] = useState<{ id: number; text: string; action?: ToastAction } | null>(null)
   const timer = useRef<number | undefined>(undefined)
-  const show = useCallback((text: string) => {
+  const show = useCallback((text: string, action?: ToastAction) => {
     window.clearTimeout(timer.current)
-    setMessage({ id: Date.now(), text })
-    timer.current = window.setTimeout(() => setMessage(null), 2600)
+    setMessage({ id: Date.now(), text, action })
+    // Leave time to reach the Undo button.
+    timer.current = window.setTimeout(() => setMessage(null), action ? 5000 : 2600)
   }, [])
   return (
     <ToastContext.Provider value={show}>
@@ -28,6 +31,14 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               transition={{ type: 'spring', damping: 18, stiffness: 320 }}
             >
               {message.text}
+              {message.action && (
+                <button
+                  className="toast-action"
+                  onClick={() => { message.action!.onClick(); window.clearTimeout(timer.current); setMessage(null) }}
+                >
+                  {message.action.label}
+                </button>
+              )}
             </motion.div>
           )}
         </AnimatePresence>

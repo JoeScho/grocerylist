@@ -8,12 +8,13 @@ import { SettingsButton } from '../components/SettingsButton'
 import { Sheet } from '../components/Sheet'
 import { useToast } from '../components/Toast'
 import {
-  addManualItem, clearAll, clearChecked, deleteItem, removeRecipeFromShop, setChecked, setItemCategory,
+  addManualItem, clearAll, clearChecked, deleteItems, deleteMeals, restoreSnapshot, setChecked, setItemCategory, setItemTotal,
+  type Snapshot,
 } from '../data/shop'
 import { setCategoryOverride } from '../data/household'
 import { CATEGORIES, CATEGORY_BY_ID } from '../lib/categories'
 import { formatQty } from '../lib/ingredients'
-import { totalQty } from '../lib/list'
+import { qtyStep, totalQty } from '../lib/list'
 import type { Household, PlanEntry, Recipe, ShopItem } from '../types'
 import { Loading } from './Recipes'
 
@@ -35,6 +36,9 @@ export function Shop({
   const confetti = useConfetti()
   const [celebrating, setCelebrating] = useState(false)
   const endCelebration = useCallback(() => setCelebrating(false), [])
+  // Meals whose ingredients are on this list; planned meals from an earlier shop live on the Week tab only.
+  const linked = useMemo(() => plan.filter(p => p.itemIds.length > 0), [plan])
+  const undoable = (message: string) => (snap: Snapshot) => toast(message, { label: 'Undo', onClick: () => restoreSnapshot(household.id, snap) })
 
   // Celebrate the moment the last item gets ticked, not when opening a list that's already done.
   const wasComplete = useRef<boolean | null>(null)
@@ -83,12 +87,12 @@ export function Shop({
         </div>
       </div>
 
-      {plan.length > 0 && (
+      {linked.length > 0 && (
         <>
           <h3 style={{ margin: '0 0 8px 4px' }}>Meals this shop</h3>
           <div className="meals">
             <AnimatePresence>
-              {plan.map(p => (
+              {linked.map(p => (
                 <motion.div
                   key={p.id}
                   className="meal"
@@ -97,8 +101,8 @@ export function Shop({
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.6 }}
                 >
-                  <button style={{ display: 'block', width: '100%', textAlign: 'left' }} onClick={() => onOpenRecipe(p.id)}>
-                    <RecipeImage src={recipeById.get(p.id)?.image ?? p.image} seed={p.id} />
+                  <button style={{ display: 'block', width: '100%', textAlign: 'left' }} onClick={() => onOpenRecipe(p.recipeId)}>
+                    <RecipeImage src={recipeById.get(p.recipeId)?.image ?? p.image} seed={p.recipeId} />
                     <div className="info">
                       <div>{p.title}</div>
                       <span className="subtle">{p.portions} portions</span>
@@ -107,7 +111,7 @@ export function Shop({
                   <button
                     className="x"
                     aria-label={`Remove ${p.title}`}
-                    onClick={async () => { await removeRecipeFromShop(household, p); toast(`Removed ${p.title}`) }}
+                    onClick={() => deleteMeals(household, [p]).then(undoable(`Removed ${p.title}`))}
                   >
                     ✕
                   </button>
@@ -168,7 +172,11 @@ export function Shop({
 
       {total > 0 && (
         <div className="row" style={{ justifyContent: 'center', marginTop: 10, flexWrap: 'wrap' }}>
-          {done > 0 && <button className="btn small ghost" onClick={() => clearChecked(household.id, items)}>Clear ticked ({done})</button>}
+          {done > 0 && (
+            <button className="btn small ghost" onClick={() => clearChecked(household.id, items).then(undoable(`Cleared ${done} ticked`))}>
+              Clear ticked ({done})
+            </button>
+          )}
           <button
             className="btn small ghost"
             onClick={async () => {
@@ -190,9 +198,10 @@ export function Shop({
             <h2 style={{ textTransform: 'capitalize' }}>{editing.name}</h2>
             {Object.keys(editing.contributions).length > 0 && (
               <p className="subtle" style={{ marginTop: -8 }}>
-                For: {Object.keys(editing.contributions).map(id => recipeById.get(id)?.title ?? plan.find(p => p.id === id)?.title ?? 'a recipe').join(', ')}
+                For: {Object.keys(editing.contributions).map(id => plan.find(p => p.id === id)?.title ?? recipeById.get(id)?.title ?? 'a recipe').join(', ')}
               </p>
             )}
+            <QtyEditor household={household} item={items.find(i => i.id === editing.id) ?? editing} />
             <h3 style={{ margin: '12px 0 10px' }}>Move to aisle</h3>
             <div className="cat-grid">
               {CATEGORIES.map(c => (
@@ -218,13 +227,29 @@ export function Shop({
             <button
               className="btn block ghost danger"
               style={{ marginTop: 20 }}
-              onClick={async () => { setEditing(null); await deleteItem(household.id, editing.id) }}
+              onClick={() => { setEditing(null); deleteItems(household.id, [editing]).then(undoable(`Removed ${editing.name}`)) }}
             >
               Remove from list
             </button>
           </>
         )}
       </Sheet>
+    </div>
+  )
+}
+
+// Sets the line's total; the difference from the recipe amounts is stored as the manual part.
+function QtyEditor({ household, item }: { household: Household; item: ShopItem }) {
+  const qty = totalQty(item) ?? 0
+  const step = qtyStep(item.unit)
+  const set = (total: number) => setItemTotal(household.id, item, Math.max(0, total))
+  return (
+    <div className="stepper" style={{ margin: '8px 0 4px' }}>
+      <motion.button whileTap={{ scale: 0.85 }} disabled={qty <= 0} onClick={() => set(qty - step)} aria-label="Less">−</motion.button>
+      <motion.span key={qty} className="value" initial={{ scale: 1.3, opacity: 0.5 }} animate={{ scale: 1, opacity: 1 }}>
+        {qty > 0 ? formatQty(qty, item.unit) : '–'}
+      </motion.span>
+      <motion.button whileTap={{ scale: 0.85 }} onClick={() => set(qty + step)} aria-label="More">+</motion.button>
     </div>
   )
 }
