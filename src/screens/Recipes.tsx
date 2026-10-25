@@ -2,10 +2,11 @@ import { motion } from 'motion/react'
 import { useMemo, useState } from 'react'
 import { ALL, LabelTabs, labelColour } from '../components/LabelTabs'
 import { RecipeImage } from '../components/RecipeImage'
+import { SettingsButton } from '../components/SettingsButton'
 import type { Household, PlanEntry, Recipe } from '../types'
 
 export function Recipes({
-  recipes, plan, household, label, onLabel, onManageLabels, onOpen, onAdd,
+  recipes, plan, household, label, onLabel, onManageLabels, onOpen, onAdd, onSettings, settingsAlert,
 }: {
   recipes: Recipe[] | null
   plan: PlanEntry[]
@@ -15,6 +16,8 @@ export function Recipes({
   onManageLabels: () => void
   onOpen: (id: string) => void
   onAdd: () => void
+  onSettings: () => void
+  settingsAlert: boolean
 }) {
   const [search, setSearch] = useState('')
   const inShop = useMemo(() => new Set(plan.map(p => p.id)), [plan])
@@ -37,6 +40,7 @@ export function Recipes({
     <div className="screen">
       <div className="screen-header">
         <h1>Recipes</h1>
+        <SettingsButton onClick={onSettings} alert={settingsAlert} />
       </div>
       {recipes && recipes.length > 0 && (
         <input className="search" placeholder="Search recipes or ingredients" value={search} onChange={e => setSearch(e.target.value)} />

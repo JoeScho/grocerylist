@@ -24,7 +24,7 @@ export function usePlan(hid: string | undefined) {
   const [plan, setPlan] = useState<PlanEntry[]>([])
   useEffect(() => {
     if (!hid) return
-    return onSnapshot(planCol(hid), snap => setPlan(snap.docs.map(d => ({ id: d.id, ...d.data() }) as PlanEntry)))
+    return onSnapshot(planCol(hid), snap => setPlan(snap.docs.map(d => ({ id: d.id, ...d.data(), cooked: d.data().cooked ?? false }) as PlanEntry)))
   }, [hid])
   return plan
 }
@@ -78,6 +78,8 @@ export async function addRecipeToShop(household: Household, recipe: Recipe, port
       image: recipe.image?.startsWith('data:') ? null : recipe.image,
       portions,
       itemIds: contributions.map(c => c.key),
+      // Changing portions shouldn't un-tick a meal you've already cooked.
+      cooked: existing.data()?.cooked ?? false,
     })
   })
 }
@@ -116,6 +118,7 @@ export async function addManualItem(household: Household, text: string) {
   })
 }
 
+export const setCooked = (hid: string, id: string, cooked: boolean) => updateDoc(doc(planCol(hid), id), { cooked })
 export const setChecked = (hid: string, id: string, checked: boolean) => updateDoc(doc(itemsCol(hid), id), { checked })
 export const setItemCategory = (hid: string, id: string, category: string) => updateDoc(doc(itemsCol(hid), id), { category })
 export const deleteItem = (hid: string, id: string) => deleteDoc(doc(itemsCol(hid), id))

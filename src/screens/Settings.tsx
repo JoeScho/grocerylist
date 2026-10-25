@@ -4,17 +4,20 @@ import { signOut, type User } from 'firebase/auth'
 import { auth } from '../firebase'
 import { useToast } from '../components/Toast'
 import {
-  addMember, addStaple, removeMember, removeStaple, renameHousehold, switchHousehold, useInvites,
+  addMember, addStaple, removeMember, removeStaple, renameHousehold, switchHousehold,
 } from '../data/household'
 import { isIos, isStandalone, useInstallPrompt } from '../lib/install'
 import { normaliseName } from '../lib/ingredients'
 import type { Household } from '../types'
 
+interface Invite { id: string; name: string; ownerEmail: string }
+
 const AVATAR_COLOURS = ['var(--coral)', 'var(--grape)', 'var(--sky)', 'var(--mint)', 'var(--orange)']
 
-export function Home({ user, household }: { user: User; household: Household }) {
+export function Settings({
+  user, household, invites, onBack,
+}: { user: User; household: Household; invites: Invite[]; onBack: () => void }) {
   const toast = useToast()
-  const invites = useInvites(user, household.id)
   const { available, install } = useInstallPrompt()
   const [email, setEmail] = useState('')
   const [staple, setStaple] = useState('')
@@ -45,9 +48,10 @@ export function Home({ user, household }: { user: User; household: Household }) 
   }
 
   return (
-    <div className="screen">
+    <motion.div className="screen" initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 40 }}>
       <div className="screen-header">
-        <h1>Home</h1>
+        <button className="icon-btn" onClick={onBack} aria-label="Back">←</button>
+        <h1 style={{ flex: 1 }}>Settings</h1>
         <button className="text-btn" onClick={() => signOut(auth)}>Sign out</button>
       </div>
 
@@ -125,6 +129,6 @@ export function Home({ user, household }: { user: User; household: Household }) 
           </AnimatePresence>
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }

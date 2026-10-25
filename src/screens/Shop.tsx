@@ -2,6 +2,7 @@ import { AnimatePresence, LayoutGroup, motion } from 'motion/react'
 import { useMemo, useState } from 'react'
 import { Check } from '../components/Check'
 import { RecipeImage } from '../components/RecipeImage'
+import { SettingsButton } from '../components/SettingsButton'
 import { Sheet } from '../components/Sheet'
 import { useToast } from '../components/Toast'
 import {
@@ -15,13 +16,15 @@ import type { Household, PlanEntry, Recipe, ShopItem } from '../types'
 import { Loading } from './Recipes'
 
 export function Shop({
-  household, items, plan, recipes, onOpenRecipe,
+  household, items, plan, recipes, onOpenRecipe, onSettings, settingsAlert,
 }: {
   household: Household
   items: ShopItem[] | null
   plan: PlanEntry[]
   recipes: Recipe[] | null
   onOpenRecipe: (id: string) => void
+  onSettings: () => void
+  settingsAlert: boolean
 }) {
   const toast = useToast()
   const [text, setText] = useState('')
@@ -54,7 +57,10 @@ export function Shop({
     <div className="screen">
       <div className="screen-header">
         <h1>Shop</h1>
-        {total > 0 && <Progress done={done} total={total} />}
+        <div className="row">
+          {total > 0 && <Progress done={done} total={total} />}
+          <SettingsButton onClick={onSettings} alert={settingsAlert} />
+        </div>
       </div>
 
       {plan.length > 0 && (

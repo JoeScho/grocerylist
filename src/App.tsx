@@ -5,22 +5,24 @@ import { BottomNav, type Tab } from './components/BottomNav'
 import { ALL } from './components/LabelTabs'
 import { useConfetti } from './components/Confetti'
 import { useToast } from './components/Toast'
-import { addStaple, removeStaple, useAuth, useHousehold } from './data/household'
+import { addStaple, removeStaple, useAuth, useHousehold, useInvites } from './data/household'
 import { createRecipe, deleteRecipe, updateRecipe, useRecipes } from './data/recipes'
 import { addRecipeToShop, removeRecipeFromShop, useItems, usePlan } from './data/shop'
 import { AddRecipeSheet } from './screens/AddRecipeSheet'
 import { AddToShopSheet } from './screens/AddToShopSheet'
-import { Home } from './screens/Home'
 import { LabelsSheet } from './screens/LabelsSheet'
 import { RecipeDetail } from './screens/RecipeDetail'
 import { RecipeEditor } from './screens/RecipeEditor'
 import { Loading, Recipes } from './screens/Recipes'
+import { Settings } from './screens/Settings'
 import { Shop } from './screens/Shop'
+import { Week } from './screens/Week'
 import { SignIn } from './screens/SignIn'
 import type { Household, RecipeDraft } from './types'
 
 type Route =
   | { name: Tab }
+  | { name: 'settings' }
   | { name: 'recipe'; id: string }
   | { name: 'edit'; id?: string; draft: RecipeDraft; warning?: string }
 
@@ -66,7 +68,9 @@ function SignedIn({ user, household }: { user: User; household: Household }) {
   const [label, setLabel] = useState(ALL)
   const activeLabel = label === ALL || household.recipeLabels.includes(label) ? label : ALL
 
-  const tab: Tab = route.name === 'shop' || route.name === 'home' ? route.name : 'recipes'
+  const tab: Tab = route.name === 'week' || route.name === 'shop' ? route.name : 'recipes'
+  const invites = useInvites(user, household.id)
+  const openSettings = () => go({ name: 'settings' })
   const recipe = route.name === 'recipe' ? recipes?.find(r => r.id === route.id) : undefined
   const planEntry = recipe ? plan.find(p => p.id === recipe.id) : undefined
   const unchecked = items?.filter(i => !i.checked).length ?? 0
@@ -96,6 +100,8 @@ function SignedIn({ user, household }: { user: User; household: Household }) {
             onManageLabels={() => setManagingLabels(true)}
             onOpen={id => go({ name: 'recipe', id })}
             onAdd={() => setAdding(true)}
+            onSettings={openSettings}
+            settingsAlert={invites.length > 0}
           />
         )}
 
@@ -145,13 +151,35 @@ function SignedIn({ user, household }: { user: User; household: Household }) {
         )}
 
         {route.name === 'shop' && (
-          <Shop key="shop" household={household} items={items} plan={plan} recipes={recipes} onOpenRecipe={id => go({ name: 'recipe', id })} />
+          <Shop
+            key="shop"
+            household={household}
+            items={items}
+            plan={plan}
+            recipes={recipes}
+            onOpenRecipe={id => go({ name: 'recipe', id })}
+            onSettings={openSettings}
+            settingsAlert={invites.length > 0}
+          />
         )}
 
-        {route.name === 'home' && <Home key="home" user={user} household={household} />}
+        {route.name === 'week' && (
+          <Week
+            key="week"
+            household={household}
+            plan={plan}
+            recipes={recipes}
+            onOpenRecipe={id => go({ name: 'recipe', id })}
+            onBrowse={() => go({ name: 'recipes' })}
+            onSettings={openSettings}
+            settingsAlert={invites.length > 0}
+          />
+        )}
+
+        {route.name === 'settings' && <Settings key="settings" user={user} household={household} invites={invites} onBack={back} />}
       </AnimatePresence>
 
-      {route.name !== 'edit' && <BottomNav tab={tab} shopCount={unchecked} onChange={t => t !== route.name && go({ name: t })} />}
+      {route.name !== 'edit' && route.name !== 'settings' && <BottomNav tab={tab} shopCount={unchecked} weekCount={plan.filter(p => !p.cooked).length} onChange={t => t !== route.name && go({ name: t })} />}
 
       <AddRecipeSheet
         open={adding}

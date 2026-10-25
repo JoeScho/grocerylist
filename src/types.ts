@@ -44,4 +44,5 @@ export interface PlanEntry {
   image: string | null
   portions: number
   itemIds: string[]
+  cooked: boolean
 }

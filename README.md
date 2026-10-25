@@ -10,8 +10,9 @@ Built with React, Vite and Firebase (Google sign-in, Firestore, one Cloud Functi
 - **Instagram captions**: parsed in the browser by `src/lib/caption.ts`, which looks for "Ingredients" / "Method" style headings and falls back to spotting quantity lines and numbered steps.
 - **Merging**: `src/lib/list.ts` turns each ingredient into a name + base unit (g, ml, tsp…). Lines with the same name and unit are added together. Each recipe's share is stored separately on the item, so removing a meal takes its quantities back off.
 - **Categories**: keyword rules in `src/lib/categories.ts`, with anything unknown going to Misc. Moving an item to another aisle remembers that choice for the household.
+- **Week**: recipes added to the shop also appear on the Week tab, where you tick each one off once it's cooked. Starting a new shop starts a new week.
 - **Staples**: the household's staples list starts those ingredients unticked when adding a recipe to the shop.
-- **Sharing**: everything lives under a household document. Adding someone's Google email on the Home tab gives them access when they sign in.
+- **Sharing**: everything lives under a household document. Adding someone's Google email in Settings (the cog, top right) gives them access when they sign in.
 
 ## Setup
 
@@ -36,7 +37,7 @@ Built with React, Vite and Firebase (Google sign-in, Firestore, one Cloud Functi
    ```
 
 8. Open `https://<project-id>.web.app` on your phone, sign in, and add it to your home screen (Safari: Share > Add to Home Screen; Chrome: menu > Install app).
-9. On the Home tab, invite your partner by their Gmail address and send them the link.
+9. In Settings (the cog, top right), invite your partner by their Gmail address and send them the link.
 
 ## Development
 

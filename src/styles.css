@@ -104,9 +104,10 @@ label.field > span { display: block; font-weight: 800; font-size: 14px; margin: 
   box-shadow: 0 12px 30px rgba(43, 33, 64, 0.35);
 }
 .nav button {
-  flex: 1; position: relative; color: #fff; font-weight: 800; font-size: 14px;
-  display: flex; align-items: center; justify-content: center; gap: 6px; border-radius: 999px;
+  flex: 1; position: relative; color: #fff; font-weight: 800; font-size: 12px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; border-radius: 999px;
 }
+.nav button span:first-of-type { font-size: 18px; line-height: 1; }
 .nav button span { position: relative; z-index: 1; }
 .nav .pill { position: absolute; inset: 0; border-radius: 999px; background: var(--coral); }
 .nav .badge {
@@ -283,3 +284,20 @@ label.field > span { display: block; font-weight: 800; font-size: 14px; margin: 
 .label-choice.on { color: #fff; border-color: transparent; }
 .card-labels { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
 .card-label { font-size: 11px; font-weight: 800; color: #fff; padding: 2px 8px; border-radius: 999px; }
+
+/* Week */
+.week-list { display: grid; gap: 12px; }
+.week-card { display: flex; align-items: center; gap: 14px; background: #fff; border-radius: var(--radius); box-shadow: var(--shadow); padding: 10px 14px 10px 10px; }
+.week-card .pic { width: 76px; height: 76px; border-radius: 16px; overflow: hidden; flex-shrink: 0; }
+.week-card .pic img, .week-card .pic .placeholder { width: 100%; height: 100%; object-fit: cover; font-size: 34px; }
+.week-card .body { flex: 1; min-width: 0; text-align: left; }
+.week-card .body .t { font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 17px; line-height: 1.2; }
+.week-card.cooked { opacity: 0.55; }
+.week-card.cooked .t { text-decoration: line-through; }
+.cook-btn { width: 52px; height: 52px; border-radius: 50%; border: 3px dashed var(--line); display: grid; place-items: center; font-size: 24px; flex-shrink: 0; background: #fff; }
+.cook-btn.on { background: var(--mint); border: 3px solid var(--mint); color: #fff; }
+.week-bar { height: 14px; background: #fff; border-radius: 999px; overflow: hidden; box-shadow: inset 0 2px 0 var(--line); margin: -6px 0 20px; }
+.week-bar div { height: 100%; background: linear-gradient(90deg, var(--mint), var(--sky)); border-radius: 999px; }
+
+.settings-btn { position: relative; color: var(--ink); }
+.settings-dot { position: absolute; top: 2px; right: 2px; width: 12px; height: 12px; border-radius: 50%; background: var(--coral); border: 2px solid #fff; }
