@@ -1,5 +1,5 @@
 import { AnimatePresence, LayoutGroup, motion, useDragControls } from 'motion/react'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { useConfetti } from '../components/Confetti'
 import { RecipeImage } from '../components/RecipeImage'
 import { SettingsButton } from '../components/SettingsButton'
@@ -23,9 +23,12 @@ function weekTitle(start: string, current: string) {
 }
 
 export function Week({
-  household, plan, recipes, onOpenRecipe, onBrowse, onSettings, settingsAlert,
+  household, plan, recipes, viewed, onView, onOpenRecipe, onBrowse, onSettings, settingsAlert,
 }: {
   household: Household
+  // The Monday being viewed, kept by the parent so opening a recipe doesn't reset it. Null means this week.
+  viewed: string | null
+  onView: (start: string | null) => void
   plan: PlanEntry[]
   recipes: Recipe[] | null
   onOpenRecipe: (id: string) => void
@@ -37,7 +40,8 @@ export function Week({
   const confetti = useConfetti()
   const today = toISODate(new Date())
   const current = weekStart(today)
-  const [start, setStart] = useState(current)
+  const start = viewed ?? current
+  const setStart = (s: string) => onView(s === current ? null : s)
   const past = start < current
   const recipeById = useMemo(() => new Map((recipes ?? []).map(r => [r.id, r])), [recipes])
   const { tray, days } = useMemo(() => layoutWeek(plan, start, today), [plan, start, today])
@@ -144,7 +148,7 @@ export function Week({
       )}
 
       <LayoutGroup>
-        {tray && (tray.length > 0 || drag) && (
+        {tray && !nothingPlanned && (
           <section className={`day tray ${over === TRAY ? 'over' : ''}`} data-drop={TRAY}>
             <div className="day-head">
               <span>📥 To plan</span>
@@ -152,6 +156,7 @@ export function Week({
             </div>
             <div className="day-meals">
               <AnimatePresence initial={false}>{tray.map(card)}</AnimatePresence>
+              {tray.length === 0 && <div className="day-empty">All planned. Drop a meal here to unplan it.</div>}
             </div>
           </section>
         )}
@@ -203,6 +208,8 @@ function MealCard({
   const swipe = useDragControls()
   // A swipe that snaps back still ends in a click; don't open the recipe for it.
   const swiped = useRef(false)
+  // Only a sideways swipe deletes; a scroll that starts on the card must not.
+  const axis = useRef<'x' | 'y' | null>(null)
   const open = () => { if (!swiped.current) onOpen() }
 
   return (
@@ -212,7 +219,7 @@ function MealCard({
       className="swipe-wrap"
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: lifted ? 0.3 : 1, y: 0 }}
-      exit={{ opacity: 0, x: -320, transition: { duration: 0.2 } }}
+      exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.15 } }}
       transition={{ type: 'spring', damping: 24, stiffness: 300 }}
     >
       {!readOnly && <div className="swipe-bin">🗑️</div>}
@@ -224,11 +231,13 @@ function MealCard({
         dragDirectionLock
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={{ left: 0.9, right: 0 }}
-        onPointerDown={e => { if (!readOnly) swipe.start(e) }}
+        onPointerDown={e => { if (!readOnly) { axis.current = null; swipe.start(e) } }}
         onDragStart={() => { swiped.current = true }}
+        onDirectionLock={a => { axis.current = a }}
         onDragEnd={(_, info) => {
           window.setTimeout(() => { swiped.current = false }, 50)
-          if (info.offset.x < -110 || info.velocity.x < -600) onRemove()
+          const sideways = axis.current === 'x' && Math.abs(info.offset.x) > Math.abs(info.offset.y)
+          if (sideways && (info.offset.x < -110 || (info.offset.x < -40 && info.velocity.x < -600))) onRemove()
         }}
         style={{ touchAction: 'pan-y' }}
       >

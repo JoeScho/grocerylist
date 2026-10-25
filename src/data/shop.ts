@@ -6,7 +6,7 @@ import {
 import { db } from '../firebase'
 import { categorise } from '../lib/categories'
 import { parseIngredient, toBase } from '../lib/ingredients'
-import { itemKey, manualQtyForTotal, recipeContributions } from '../lib/list'
+import { itemKey, keepItem, manualQtyForTotal, nextContributions, recipeContributions } from '../lib/list'
 import { cookedDay } from '../lib/week'
 import type { Household, PlanEntry, Recipe, ShopItem } from '../types'
 
@@ -60,9 +60,11 @@ async function applyMeal(
   mealId: string,
   previousIds: string[],
   contributions: { key: string; name: string; unit: string | null; qty: number | null }[],
+  replaced: PlanEntry[] = [],
 ) {
   const byKey = new Map(contributions.map(c => [c.key, c]))
-  const ids = [...new Set([...previousIds, ...byKey.keys()])]
+  const ids = [...new Set([...previousIds, ...replaced.flatMap(m => m.itemIds), ...byKey.keys()])]
+  const drop = replaced.map(m => m.id)
   const snaps = await Promise.all(ids.map(id => tx.get(doc(itemsCol(household.id), id))))
   const before: Snapshot['items'] = []
   snaps.forEach((snap, i) => {
@@ -84,25 +86,26 @@ async function applyMeal(
     }
     before.push({ id, data: snap.data() })
     const item = snap.data() as ShopItem
-    const next = { ...item.contributions }
-    delete next[mealId]
-    if (c) next[mealId] = c.qty
-    if (Object.keys(next).length === 0 && !item.manual) tx.delete(snap.ref)
+    const next = nextContributions(item.contributions, mealId, c?.qty, drop)
+    if (!keepItem({ ...item, contributions: next })) tx.delete(snap.ref)
     else tx.update(snap.ref, { contributions: next, ...(c ? { checked: false } : {}) })
   })
   return before
 }
 
 // Reuses the recipe's uncooked meal if there is one, so its day survives; otherwise starts a new meal.
+// A cooked meal of the same recipe still on the list hands its lines over to the new one.
 export async function addRecipeToShop(
-  household: Household, recipe: Recipe, portions: number, ingredients: string[], openMeal: PlanEntry | undefined,
+  household: Household, recipe: Recipe, portions: number, ingredients: string[], openMeal: PlanEntry | undefined, plan: PlanEntry[],
 ) {
+  const replaced = openMeal ? [] : plan.filter(p => p.recipeId === recipe.id && p.cooked && p.itemIds.length > 0)
   const mealRef = openMeal ? doc(planCol(household.id), openMeal.id) : doc(planCol(household.id))
   const contributions = recipeContributions(ingredients, recipe.servings, portions)
   await runTransaction(db, async tx => {
     const existing = await tx.get(mealRef)
     const previous = (existing.data()?.itemIds as string[] | undefined) ?? []
-    await applyMeal(tx, household, mealRef.id, previous, contributions)
+    await applyMeal(tx, household, mealRef.id, previous, contributions, replaced)
+    replaced.forEach(m => tx.update(doc(planCol(household.id), m.id), { itemIds: [] }))
     tx.set(mealRef, {
       recipeId: recipe.id,
       title: recipe.title,
@@ -132,7 +135,7 @@ export async function deleteMeals(household: Household, meals: PlanEntry[]): Pro
     for (const [id, item] of items) {
       const next = Object.fromEntries(Object.entries(item.contributions).filter(([k]) => !mealIds.has(k)))
       const ref = doc(itemsCol(household.id), id)
-      if (Object.keys(next).length === 0 && !item.manual) tx.delete(ref)
+      if (!keepItem({ ...item, contributions: next })) tx.delete(ref)
       else tx.update(ref, { contributions: next })
     }
     refs.forEach(r => tx.delete(r))

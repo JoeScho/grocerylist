@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { isStaple, itemKey, manualQtyForTotal, qtyStep, recipeContributions, totalQty } from './list'
+import { isStaple, itemKey, keepItem, manualQtyForTotal, nextContributions, qtyStep, recipeContributions, totalQty } from './list'
 
 describe('recipeContributions', () => {
   it('scales to portions and converts to base units', () => {
@@ -56,5 +56,33 @@ describe('qtyStep', () => {
     expect(qtyStep('ml')).toBe(50)
     expect(qtyStep(null)).toBe(1)
     expect(qtyStep('tbsp')).toBe(1)
+  })
+})
+
+describe('nextContributions', () => {
+  it('replaces a cooked meal of the same recipe instead of adding to it', () => {
+    expect(nextContributions({ A: 400 }, 'B', 400, ['A'])).toEqual({ B: 400 })
+  })
+  it('keeps other meals and drops this meal when it has no share', () => {
+    expect(nextContributions({ A: 1, B: 2 }, 'B', undefined, [])).toEqual({ A: 1 })
+  })
+})
+
+describe('keepItem', () => {
+  it('drops a line whose only manual amount was a reduction', () => {
+    expect(keepItem({ manual: true, manualQty: -100, contributions: {} })).toBe(false)
+    expect(keepItem({ manual: true, manualQty: 0, contributions: {} })).toBe(false)
+  })
+  it('keeps manual lines with an amount or no number', () => {
+    expect(keepItem({ manual: true, manualQty: 2, contributions: {} })).toBe(true)
+    expect(keepItem({ manual: true, manualQty: null, contributions: {} })).toBe(true)
+    expect(keepItem({ manual: false, manualQty: null, contributions: { a: 1 } })).toBe(true)
+    expect(keepItem({ manual: false, manualQty: null, contributions: {} })).toBe(false)
+  })
+})
+
+describe('totalQty floor', () => {
+  it('never shows a negative amount', () => {
+    expect(totalQty({ manual: true, manualQty: -100, contributions: { a: 50 } })).toBe(0)
   })
 })

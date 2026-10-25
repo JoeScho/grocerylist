@@ -45,7 +45,29 @@ export function totalQty(item: ItemQuantities): number | null {
   const values = Object.values(item.contributions)
   if (item.manual) values.push(item.manualQty)
   const nums = values.filter((v): v is number => typeof v === 'number')
-  return nums.length ? nums.reduce((a, b) => a + b, 0) : null
+  // A manual reduction can outlast the recipe amount it was taken off; never show below zero.
+  return nums.length ? Math.max(0, nums.reduce((a, b) => a + b, 0)) : null
+}
+
+// One meal's new share of an item. Meals in `drop` (an earlier, cooked meal of the same
+// recipe) lose theirs, so adding a recipe again replaces its amounts rather than doubling them.
+export function nextContributions(
+  current: Record<string, number | null>,
+  mealId: string,
+  qty: number | null | undefined,
+  drop: string[],
+): Record<string, number | null> {
+  const next = { ...current }
+  delete next[mealId]
+  drop.forEach(id => delete next[id])
+  if (qty !== undefined) next[mealId] = qty
+  return next
+}
+
+// An item stays on the list while a meal needs it or someone typed it in with an amount.
+export function keepItem(item: ItemQuantities): boolean {
+  if (Object.keys(item.contributions).length > 0) return true
+  return item.manual && (item.manualQty === null || item.manualQty > 0)
 }
 
 export function isStaple(name: string, staples: string[]): boolean {

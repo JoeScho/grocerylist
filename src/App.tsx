@@ -67,6 +67,7 @@ function SignedIn({ user, household }: { user: User; household: Household }) {
   const [managingLabels, setManagingLabels] = useState(false)
   // Kept here so the chosen tab survives opening a recipe and coming back.
   const [label, setLabel] = useState(ALL)
+  const [viewedWeek, setViewedWeek] = useState<string | null>(null)
   const activeLabel = label === ALL || household.recipeLabels.includes(label) ? label : ALL
 
   const tab: Tab = route.name === 'week' || route.name === 'shop' ? route.name : 'recipes'
@@ -185,6 +186,8 @@ function SignedIn({ user, household }: { user: User; household: Household }) {
             household={household}
             plan={plan}
             recipes={recipes}
+            viewed={viewedWeek}
+            onView={setViewedWeek}
             onOpenRecipe={id => go({ name: 'recipe', id, fromWeek: true })}
             onBrowse={() => go({ name: 'recipes' })}
             onSettings={openSettings}
@@ -221,7 +224,7 @@ function SignedIn({ user, household }: { user: User; household: Household }) {
           household={household}
           planEntry={planEntry}
           onConfirm={async (portions, ingredients) => {
-            await addRecipeToShop(household, recipe, portions, ingredients, planEntry)
+            await addRecipeToShop(household, recipe, portions, ingredients, planEntry, plan)
             setShopping(false)
             confetti()
             toast(`🛒 ${recipe.title} added for ${portions}`)
