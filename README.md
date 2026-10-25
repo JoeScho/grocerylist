@@ -8,9 +8,9 @@ Built with React, Vite and Firebase (Google sign-in, Firestore, one Cloud Functi
 
 - **Link import**: the `importRecipe` Cloud Function fetches the page and reads its schema.org Recipe data (JSON-LD, falling back to microdata). No AI involved. Pages without that data come back with just a title and image for you to fill in.
 - **Instagram captions**: parsed in the browser by `src/lib/caption.ts`, which looks for "Ingredients" / "Method" style headings and falls back to spotting quantity lines and numbered steps.
-- **Merging**: `src/lib/list.ts` turns each ingredient into a name + base unit (g, ml, tsp…). Lines with the same name and unit are added together. Each recipe's share is stored separately on the item, so removing a meal takes its quantities back off.
+- **Merging**: `src/lib/list.ts` turns each ingredient into a name + base unit (g, ml, tsp…). Lines with the same name and unit are added together. Each meal's share is stored separately on the item, so removing a meal takes its quantities back off. Changing an item's quantity on the list stores the difference as a manual amount.
 - **Categories**: keyword rules in `src/lib/categories.ts`, with anything unknown going to Misc. Moving an item to another aisle remembers that choice for the household.
-- **Week**: recipes added to the shop also appear on the Week tab, where you tick each one off once it's cooked. Starting a new shop starts a new week.
+- **Week**: recipes added to the shop become meals on the Week tab, shown Monday to Sunday. New meals wait in the To plan tray until you drag them onto a day (a day can hold several, or none). A meal stays planned until it's ticked as cooked; uncooked meals from a finished week drop back into the tray. Earlier weeks are kept as a read-only history of what was cooked. Starting a new shop clears the list but keeps the meals.
 - **Staples**: the household's staples list starts those ingredients unticked when adding a recipe to the shop.
 - **Sharing**: everything lives under a household document. Adding someone's Google email in Settings (the cog, top right) gives them access when they sign in.
 
