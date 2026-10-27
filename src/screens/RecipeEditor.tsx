@@ -3,9 +3,7 @@ import { useRef, useState } from 'react'
 import { labelColour } from '../components/LabelTabs'
 import { FieldTools } from '../components/FieldTools'
 import { RecipeImage } from '../components/RecipeImage'
-import { useToast } from '../components/Toast'
 import { fileToDataUrl } from '../lib/image'
-import { localiseRecipe } from '../lib/localise'
 import type { RecipeDraft } from '../types'
 
 const splitIngredients = (text: string) => text.split('\n').map(s => s.trim()).filter(Boolean)
@@ -33,24 +31,6 @@ export function RecipeEditor({
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const fileInput = useRef<HTMLInputElement>(null)
-  const toast = useToast()
-
-  const tidy = () => {
-    const before = { title, ingredients, steps }
-    const after = localiseRecipe({ title: title.trim(), ingredients: splitIngredients(ingredients), steps: splitSteps(steps) })
-    const next = { title: after.title, ingredients: after.ingredients.join('\n'), steps: after.steps.join('\n\n') }
-    if (next.title === before.title && next.ingredients === before.ingredients && next.steps === before.steps) {
-      toast('Already tidy ✨')
-      return
-    }
-    setTitle(next.title)
-    setIngredients(next.ingredients)
-    setSteps(next.steps)
-    toast('Tidied up ✨', {
-      label: 'Undo',
-      onClick: () => { setTitle(before.title); setIngredients(before.ingredients); setSteps(before.steps) },
-    })
-  }
 
   const pickImage = async (file: File | undefined) => {
     if (!file) return
@@ -90,11 +70,6 @@ export function RecipeEditor({
 
       {warning && <div className="hint">{warning}</div>}
       {error && <div className="error-box">{error}</div>}
-
-      <motion.button className="btn small ghost tidy-btn" onClick={tidy} whileTap={{ scale: 0.97 }}>
-        ✨ Tidy up
-        <small>Capitals, UK names, metric, no coriander</small>
-      </motion.button>
 
       <div style={{ marginBottom: 16 }}>
         <input ref={fileInput} type="file" accept="image/*" hidden onChange={e => pickImage(e.target.files?.[0])} />

@@ -128,3 +128,21 @@ describe('capitals', () => {
     expect(r.steps).toEqual(['Fry the onions.', '"Stir" well'])
   })
 })
+
+describe('running twice', () => {
+  it('changes nothing the second time', () => {
+    const once = localiseRecipe({
+      title: 'chicken with lime and cilantro rice',
+      ingredients: [
+        '1 bunch fresh cilantro, chopped', 'Mint and coriander, to serve', '4 scallions, sliced', '1 cup all-purpose flour',
+        '1-2 cups spinach', '3 pounds chicken thighs', '1 (14 oz) can chickpeas', '1 stick unsalted butter',
+        '1-inch piece ginger', '1 cup (120g) flour', '600g/ 1.2lb chicken thigh', 'salt', '½ lemon',
+      ],
+      steps: [
+        'Preheat the oven to 350°F (180°C).', 'heat a skillet, then broil for 3 minutes.', 'Grease a 9x13-inch dish.',
+        'Garnish with coriander and lime wedges.', 'Pour in 2 cups of stock.', 'Preheat oven to 425 degrees.',
+      ],
+    })
+    expect(localiseRecipe(once)).toEqual(once)
+  })
+})
