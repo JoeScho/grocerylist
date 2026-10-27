@@ -1,6 +1,7 @@
 import { motion } from 'motion/react'
 import { useRef, useState } from 'react'
 import { labelColour } from '../components/LabelTabs'
+import { FieldTools } from '../components/FieldTools'
 import { RecipeImage } from '../components/RecipeImage'
 import { fileToDataUrl } from '../lib/image'
 import type { RecipeDraft } from '../types'
@@ -85,7 +86,9 @@ export function RecipeEditor({
 
       <label className="field">
         <span>Title</span>
-        <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Grandma's lasagne" />
+        <FieldTools value={title} onChange={setTitle}>
+          <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Grandma's lasagne" />
+        </FieldTools>
       </label>
       {labels.length > 0 && (
         <div className="field">
@@ -117,16 +120,22 @@ export function RecipeEditor({
         </label>
         <label className="field" style={{ flex: 1 }}>
           <span>Source link</span>
-          <input type="url" inputMode="url" value={sourceUrl} onChange={e => setSourceUrl(e.target.value)} placeholder="https://…" />
+          <FieldTools value={sourceUrl} onChange={setSourceUrl} url>
+            <input type="url" inputMode="url" value={sourceUrl} onChange={e => setSourceUrl(e.target.value)} placeholder="https://…" />
+          </FieldTools>
         </label>
       </div>
       <label className="field">
         <span>Ingredients · one per line</span>
-        <textarea value={ingredients} onChange={e => setIngredients(e.target.value)} style={{ minHeight: 200 }} placeholder={'500g chicken thighs\n1 onion, diced\n2 tbsp olive oil'} />
+        <FieldTools value={ingredients} onChange={setIngredients}>
+          <textarea value={ingredients} onChange={e => setIngredients(e.target.value)} style={{ minHeight: 200 }} placeholder={'500g chicken thighs\n1 onion, diced\n2 tbsp olive oil'} />
+        </FieldTools>
       </label>
       <label className="field">
         <span>Steps · leave a blank line between steps</span>
-        <textarea value={steps} onChange={e => setSteps(e.target.value)} style={{ minHeight: 240 }} placeholder={'Fry the onion until soft.\n\nAdd the chicken and brown all over.'} />
+        <FieldTools value={steps} onChange={setSteps}>
+          <textarea value={steps} onChange={e => setSteps(e.target.value)} style={{ minHeight: 240 }} placeholder={'Fry the onion until soft.\n\nAdd the chicken and brown all over.'} />
+        </FieldTools>
       </label>
 
       {error && <div className="error-box">{error}</div>}

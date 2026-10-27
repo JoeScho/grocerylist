@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import { useState } from 'react'
 import { signOut, type User } from 'firebase/auth'
 import { auth } from '../firebase'
+import { FieldTools } from '../components/FieldTools'
 import { useToast } from '../components/Toast'
 import {
   addMember, addStaple, removeMember, removeStaple, renameHousehold, switchHousehold,
@@ -106,7 +107,9 @@ export function Settings({
 
         <p className="subtle" style={{ margin: '12px 0 8px' }}>Share recipes and the list with someone by adding their Google email.</p>
         <form className="add-item" style={{ marginBottom: 0 }} onSubmit={e => { e.preventDefault(); invite() }}>
-          <input type="email" inputMode="email" placeholder="partner@gmail.com" value={email} onChange={e => setEmail(e.target.value)} />
+          <FieldTools value={email} onChange={setEmail}>
+            <input type="email" inputMode="email" placeholder="partner@gmail.com" value={email} onChange={e => setEmail(e.target.value)} />
+          </FieldTools>
           <button className="btn small grape" type="submit">Invite</button>
         </form>
       </div>

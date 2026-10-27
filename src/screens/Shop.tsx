@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Celebration } from '../components/Celebration'
 import { Check } from '../components/Check'
 import { useConfetti } from '../components/Confetti'
+import { FieldTools } from '../components/FieldTools'
 import { RecipeImage } from '../components/RecipeImage'
 import { SettingsButton } from '../components/SettingsButton'
 import { Sheet } from '../components/Sheet'
@@ -123,7 +124,9 @@ export function Shop({
       )}
 
       <form className="add-item" onSubmit={e => { e.preventDefault(); add() }}>
-        <input placeholder="Add an item, e.g. 2 lemons" value={text} onChange={e => setText(e.target.value)} enterKeyHint="done" />
+        <FieldTools value={text} onChange={setText}>
+          <input placeholder="Add an item, e.g. 2 lemons" value={text} onChange={e => setText(e.target.value)} enterKeyHint="done" />
+        </FieldTools>
         <motion.button className="btn mint" type="submit" whileTap={{ scale: 0.9 }} aria-label="Add">＋</motion.button>
       </form>
 

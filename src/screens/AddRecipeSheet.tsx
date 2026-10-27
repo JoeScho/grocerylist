@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { useState } from 'react'
+import { FieldTools } from '../components/FieldTools'
 import { Sheet } from '../components/Sheet'
 import { importFromUrl } from '../data/recipes'
 import { parseCaption } from '../lib/caption'
@@ -94,7 +95,9 @@ export function AddRecipeSheet({
             {looksInstagram && <div className="hint">Instagram won't let apps read posts. Use “From Instagram” and paste the caption, or open the website link from the post.</div>}
             <label className="field">
               <span>Recipe web address</span>
-              <input type="url" inputMode="url" placeholder="https://…" value={url} onChange={e => setUrl(e.target.value)} autoFocus />
+              <FieldTools value={url} onChange={setUrl} url>
+                <input type="url" inputMode="url" placeholder="https://…" value={url} onChange={e => setUrl(e.target.value)} autoFocus />
+              </FieldTools>
             </label>
             <button className="btn block" disabled={!url.trim() || busy} onClick={doImport}>
               {busy ? <Cooking /> : 'Fetch recipe'}
@@ -108,17 +111,21 @@ export function AddRecipeSheet({
             <h2 style={{ marginTop: 6 }}>📸 Paste the caption</h2>
             <label className="field">
               <span>Caption text</span>
-              <textarea
-                placeholder={'Creamy chicken orzo\n\nIngredients:\n500g chicken thighs\n1 onion\n\nMethod:\n1. Fry the chicken…'}
-                value={caption}
-                onChange={e => setCaption(e.target.value)}
-                style={{ minHeight: 220 }}
-                autoFocus
-              />
+              <FieldTools value={caption} onChange={setCaption}>
+                <textarea
+                  placeholder={'Creamy chicken orzo\n\nIngredients:\n500g chicken thighs\n1 onion\n\nMethod:\n1. Fry the chicken…'}
+                  value={caption}
+                  onChange={e => setCaption(e.target.value)}
+                  style={{ minHeight: 220 }}
+                  autoFocus
+                />
+              </FieldTools>
             </label>
             <label className="field">
               <span>Post link (optional)</span>
-              <input type="url" inputMode="url" placeholder="https://instagram.com/p/…" value={captionLink} onChange={e => setCaptionLink(e.target.value)} />
+              <FieldTools value={captionLink} onChange={setCaptionLink} url>
+                <input type="url" inputMode="url" placeholder="https://instagram.com/p/…" value={captionLink} onChange={e => setCaptionLink(e.target.value)} />
+              </FieldTools>
             </label>
             <button className="btn block" disabled={!caption.trim()} onClick={doCaption}>Read caption</button>
           </motion.div>
