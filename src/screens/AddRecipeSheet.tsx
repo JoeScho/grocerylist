@@ -4,6 +4,7 @@ import { FieldTools } from '../components/FieldTools'
 import { Sheet } from '../components/Sheet'
 import { importFromUrl } from '../data/recipes'
 import { parseCaption } from '../lib/caption'
+import { localiseRecipe } from '../lib/localise'
 import type { RecipeDraft } from '../types'
 
 type Mode = 'choose' | 'link' | 'caption'
@@ -29,7 +30,7 @@ export function AddRecipeSheet({
     setError(null)
     setBusy(true)
     try {
-      const draft = await importFromUrl(url.trim())
+      const draft = localiseRecipe(await importFromUrl(url.trim()))
       setUrl('')
       const warning = draft.ingredients.length === 0
         ? "Couldn't find a recipe on that page. Fill in the gaps below, or paste the text instead."
@@ -44,7 +45,7 @@ export function AddRecipeSheet({
   }
 
   const doCaption = () => {
-    const parsed = parseCaption(caption)
+    const parsed = localiseRecipe(parseCaption(caption))
     onDraft(
       { ...EMPTY, ...parsed, servings: parsed.servings ?? 4, sourceUrl: captionLink.trim() || null },
       parsed.ingredients.length === 0 ? "Couldn't spot the ingredients. Add them below, one per line." : undefined,

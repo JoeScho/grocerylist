@@ -3,8 +3,15 @@ import { useRef, useState } from 'react'
 import { labelColour } from '../components/LabelTabs'
 import { FieldTools } from '../components/FieldTools'
 import { RecipeImage } from '../components/RecipeImage'
+import { useToast } from '../components/Toast'
 import { fileToDataUrl } from '../lib/image'
+import { localiseRecipe } from '../lib/localise'
 import type { RecipeDraft } from '../types'
+
+const splitIngredients = (text: string) => text.split('\n').map(s => s.trim()).filter(Boolean)
+// Steps are separated by blank lines, or one per line when there are none.
+const splitSteps = (text: string) =>
+  (/\n\s*\n/.test(text) ? text.split(/\n\s*\n/) : text.split('\n')).map(s => s.replace(/\s+/g, ' ').trim()).filter(Boolean)
 
 export function RecipeEditor({
   initial, labels, warning, isNew, onSave, onCancel,
@@ -26,6 +33,24 @@ export function RecipeEditor({
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const fileInput = useRef<HTMLInputElement>(null)
+  const toast = useToast()
+
+  const tidy = () => {
+    const before = { title, ingredients, steps }
+    const after = localiseRecipe({ title: title.trim(), ingredients: splitIngredients(ingredients), steps: splitSteps(steps) })
+    const next = { title: after.title, ingredients: after.ingredients.join('\n'), steps: after.steps.join('\n\n') }
+    if (next.title === before.title && next.ingredients === before.ingredients && next.steps === before.steps) {
+      toast('Already tidy ✨')
+      return
+    }
+    setTitle(next.title)
+    setIngredients(next.ingredients)
+    setSteps(next.steps)
+    toast('Tidied up ✨', {
+      label: 'Undo',
+      onClick: () => { setTitle(before.title); setIngredients(before.ingredients); setSteps(before.steps) },
+    })
+  }
 
   const pickImage = async (file: File | undefined) => {
     if (!file) return
@@ -46,9 +71,8 @@ export function RecipeEditor({
         sourceUrl: sourceUrl.trim() || null,
         servings: Number(servings) > 0 ? Number(servings) : null,
         labels: chosen.filter(l => labels.includes(l)),
-        ingredients: ingredients.split('\n').map(s => s.trim()).filter(Boolean),
-        // Steps are separated by blank lines, or one per line when there are none.
-        steps: (/\n\s*\n/.test(steps) ? steps.split(/\n\s*\n/) : steps.split('\n')).map(s => s.replace(/\s+/g, ' ').trim()).filter(Boolean),
+        ingredients: splitIngredients(ingredients),
+        steps: splitSteps(steps),
       })
     } catch (e: unknown) {
       setError((e as { message?: string }).message ?? 'Could not save.')
@@ -66,6 +90,11 @@ export function RecipeEditor({
 
       {warning && <div className="hint">{warning}</div>}
       {error && <div className="error-box">{error}</div>}
+
+      <motion.button className="btn small ghost tidy-btn" onClick={tidy} whileTap={{ scale: 0.97 }}>
+        ✨ Tidy up
+        <small>Capitals, UK names, metric, no coriander</small>
+      </motion.button>
 
       <div style={{ marginBottom: 16 }}>
         <input ref={fileInput} type="file" accept="image/*" hidden onChange={e => pickImage(e.target.files?.[0])} />
