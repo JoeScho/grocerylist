@@ -2,10 +2,12 @@ import { AnimatePresence, motion } from 'motion/react'
 import { useState } from 'react'
 import { labelColour } from '../components/LabelTabs'
 import { RecipeImage } from '../components/RecipeImage'
+import { ScoreBar } from '../components/ScoreBar'
 import { Tabs } from '../components/Tabs'
 import { CATEGORY_BY_ID, categorise } from '../lib/categories'
 import { parseIngredient } from '../lib/ingredients'
 import { isStaple } from '../lib/list'
+import { classifyIngredient, currentMonth, scoreLabel, scoreRecipe, STATUS_LABEL } from '../lib/seasons'
 import { useWakeLock } from '../lib/wakeLock'
 import type { Household, PlanEntry, Recipe } from '../types'
 
@@ -29,6 +31,8 @@ export function RecipeDetail({
   const [tab, setTab] = useState<'ingredients' | 'steps'>('ingredients')
   const [done, setDone] = useState<Set<number>>(new Set())
   const [menu, setMenu] = useState(false)
+  const [month] = useState(currentMonth)
+  const score = scoreRecipe(recipe.ingredients, month)
   // Screen stays on while following the steps, so it doesn't lock mid-recipe.
   useWakeLock(tab === 'steps')
   const inShop = !!planEntry && planEntry.itemIds.length > 0
@@ -87,14 +91,22 @@ export function RecipeDetail({
         {tab === 'ingredients' ? (
           <motion.ul key="ing" className="ing-list" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
             {recipe.ingredients.length === 0 && <p className="subtle">No ingredients yet.</p>}
+            {recipe.ingredients.length > 0 && (
+              <li className="score-row">
+                <ScoreBar score={score} inline />
+                <span className="subtle">{scoreLabel(score)}</span>
+              </li>
+            )}
             {recipe.ingredients.map((text, i) => {
               const p = parseIngredient(text)
               const staple = isStaple(p.name, household.staples)
               const cat = CATEGORY_BY_ID[categorise(p.name, household.categoryOverrides)]
+              const season = classifyIngredient(text, month)
               return (
                 <motion.li key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.025 }}>
                   <span className="dot" style={{ background: cat.color }} />
                   <span className="txt">{text}</span>
+                  {season && <span className={`season-tag ${season.status}`}>{STATUS_LABEL[season.status]}</span>}
                   <button
                     className="staple-tag"
                     style={staple ? undefined : { background: 'transparent', color: 'var(--ink-soft)', border: '2px dashed var(--line)' }}
