@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { isStaple, itemKey, keepItem, manualQtyForTotal, nextContributions, qtyStep, recipeContributions, totalQty } from './list'
+import { isStaple, itemKey, keepItem, manualQtyForTotal, mealsOnShop, nextContributions, qtyStep, recipeContributions, totalQty } from './list'
 
 describe('recipeContributions', () => {
   it('scales to portions and converts to base units', () => {
@@ -84,5 +84,36 @@ describe('keepItem', () => {
 describe('totalQty floor', () => {
   it('never shows a negative amount', () => {
     expect(totalQty({ manual: true, manualQty: -100, contributions: { a: 50 } })).toBe(0)
+  })
+})
+
+describe('mealsOnShop', () => {
+  const stew = { id: 'stew', itemIds: ['leek', 'potato'] }
+  const curry = { id: 'curry', itemIds: ['lime'] }
+  const item = (id: string, checked = false) => ({ id, checked })
+
+  it('keeps a meal while any of its ingredients is still to buy', () => {
+    expect(mealsOnShop([stew, curry], [item('leek', true), item('potato'), item('lime')])).toEqual([stew, curry])
+  })
+
+  it('drops a meal once all its ingredients are ticked', () => {
+    expect(mealsOnShop([stew, curry], [item('leek', true), item('potato', true), item('lime')])).toEqual([curry])
+  })
+
+  it('drops a meal once its ingredients have been cleared off the list', () => {
+    expect(mealsOnShop([stew, curry], [item('lime')])).toEqual([curry])
+  })
+
+  it('brings a meal back when one of its ingredients is unticked', () => {
+    expect(mealsOnShop([stew], [item('leek'), item('potato', true)])).toEqual([stew])
+  })
+
+  it('has no meals when the whole list is done, or while it is loading', () => {
+    expect(mealsOnShop([stew, curry], [item('leek', true), item('potato', true), item('lime', true)])).toEqual([])
+    expect(mealsOnShop([stew, curry], null)).toEqual([])
+  })
+
+  it('ignores meals that were never linked to the list', () => {
+    expect(mealsOnShop([{ id: 'old', itemIds: [] }], [item('leek')])).toEqual([])
   })
 })

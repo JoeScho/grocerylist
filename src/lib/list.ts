@@ -70,6 +70,14 @@ export function keepItem(item: ItemQuantities): boolean {
   return item.manual && (item.manualQty === null || item.manualQty > 0)
 }
 
+// A meal belongs to the current shop while at least one of its ingredients is still
+// on the list and unticked. Once everything for it is bought or cleared it drops off
+// the Shop page (it stays planned on the Week page), and unticking brings it back.
+export function mealsOnShop<M extends { itemIds: string[] }>(meals: M[], items: { id: string; checked: boolean }[] | null): M[] {
+  const toBuy = new Set((items ?? []).filter(i => !i.checked).map(i => i.id))
+  return meals.filter(m => m.itemIds.some(id => toBuy.has(id)))
+}
+
 export function isStaple(name: string, staples: string[]): boolean {
   const n = name.toLowerCase()
   return staples.some(s => n === s || n.endsWith(' ' + s))

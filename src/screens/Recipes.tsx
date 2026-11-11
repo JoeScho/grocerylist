@@ -9,10 +9,11 @@ import { currentMonth, scoreLabel, scoreRecipe } from '../lib/seasons'
 import type { Household, PlanEntry, Recipe } from '../types'
 
 export function Recipes({
-  recipes, plan, household, label, onLabel, onManageLabels, onOpen, onAdd, onSettings, settingsAlert,
+  recipes, plan, shopMeals, household, label, onLabel, onManageLabels, onOpen, onAdd, onSettings, settingsAlert,
 }: {
   recipes: Recipe[] | null
   plan: PlanEntry[]
+  shopMeals: PlanEntry[]
   household: Household
   label: string
   onLabel: (label: string) => void
@@ -26,7 +27,7 @@ export function Recipes({
   const [order, setOrder] = useState<RecipeOrder>(loadRecipeOrder)
   const [month] = useState(currentMonth)
   const chooseOrder = (next: RecipeOrder) => { setOrder(next); saveRecipeOrder(next) }
-  const inShop = useMemo(() => new Set(plan.filter(p => !p.cooked && p.itemIds.length > 0).map(p => p.recipeId)), [plan])
+  const inShop = useMemo(() => new Set(shopMeals.filter(p => !p.cooked).map(p => p.recipeId)), [shopMeals])
   const labels = household.recipeLabels
   const counts = useMemo(() => {
     const c: Record<string, number> = { [ALL]: recipes?.length ?? 0 }

@@ -14,11 +14,12 @@ import type { Household, PlanEntry, Recipe } from '../types'
 const STEP_COLOURS = ['var(--coral)', 'var(--grape)', 'var(--sky)', 'var(--mint)', 'var(--orange)', 'var(--pink)']
 
 export function RecipeDetail({
-  recipe, household, planEntry, fromWeek, onBack, onEdit, onDelete, onAddToShop, onRemoveFromShop, onCooked, onToggleStaple,
+  recipe, household, planEntry, onShop, fromWeek, onBack, onEdit, onDelete, onAddToShop, onRemoveFromShop, onCooked, onToggleStaple,
 }: {
   recipe: Recipe
   household: Household
   planEntry: PlanEntry | undefined
+  onShop: boolean // the meal still has ingredients to buy on the list
   fromWeek: boolean
   onBack: () => void
   onEdit: () => void
@@ -35,7 +36,7 @@ export function RecipeDetail({
   const score = scoreRecipe(recipe.ingredients, month)
   // Screen stays on while following the steps, so it doesn't lock mid-recipe.
   useWakeLock(tab === 'steps')
-  const inShop = !!planEntry && planEntry.itemIds.length > 0
+  const inShop = !!planEntry && onShop
   const cookNow = fromWeek && !!planEntry
   const host = (() => {
     try { return recipe.sourceUrl ? new URL(recipe.sourceUrl).hostname.replace(/^www\./, '') : null } catch { return null }

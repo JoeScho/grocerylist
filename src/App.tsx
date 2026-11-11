@@ -1,5 +1,6 @@
 import { AnimatePresence } from 'motion/react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { mealsOnShop } from './lib/list'
 import type { User } from 'firebase/auth'
 import { BottomNav, type Tab } from './components/BottomNav'
 import { ALL } from './components/LabelTabs'
@@ -77,6 +78,7 @@ function SignedIn({ user, household }: { user: User; household: Household }) {
   // The recipe's uncooked meal, if any. Cooked meals are history and don't count.
   const planEntry = recipe ? openMealFor(plan, recipe.id) : undefined
   const unchecked = items?.filter(i => !i.checked).length ?? 0
+  const shopMeals = useMemo(() => mealsOnShop(plan, items), [plan, items])
 
   const toggleStaple = async (name: string, staple: boolean) => {
     if (staple) {
@@ -97,6 +99,7 @@ function SignedIn({ user, household }: { user: User; household: Household }) {
             key="recipes"
             recipes={recipes}
             plan={plan}
+            shopMeals={shopMeals}
             household={household}
             label={activeLabel}
             onLabel={setLabel}
@@ -115,6 +118,7 @@ function SignedIn({ user, household }: { user: User; household: Household }) {
               recipe={recipe}
               household={household}
               planEntry={planEntry}
+              onShop={!!planEntry && shopMeals.some(m => m.id === planEntry.id)}
               fromWeek={route.name === 'recipe' && !!route.fromWeek}
               onBack={back}
               onEdit={() => go({ name: 'edit', id: recipe.id, draft: recipe })}

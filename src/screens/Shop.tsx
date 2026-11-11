@@ -15,7 +15,7 @@ import {
 import { setCategoryOverride } from '../data/household'
 import { CATEGORIES, CATEGORY_BY_ID } from '../lib/categories'
 import { formatQty } from '../lib/ingredients'
-import { qtyStep, totalQty } from '../lib/list'
+import { mealsOnShop, qtyStep, totalQty } from '../lib/list'
 import type { Household, PlanEntry, Recipe, ShopItem } from '../types'
 import { Loading } from './Recipes'
 
@@ -37,8 +37,8 @@ export function Shop({
   const confetti = useConfetti()
   const [celebrating, setCelebrating] = useState(false)
   const endCelebration = useCallback(() => setCelebrating(false), [])
-  // Meals whose ingredients are on this list; planned meals from an earlier shop live on the Week tab only.
-  const linked = useMemo(() => plan.filter(p => p.itemIds.length > 0), [plan])
+  // Meals with ingredients still to buy; planned meals from an earlier shop live on the Week tab only.
+  const linked = useMemo(() => mealsOnShop(plan, items), [plan, items])
   const undoable = (message: string) => (snap: Snapshot) => toast(message, { label: 'Undo', onClick: () => restoreSnapshot(household.id, snap) })
 
   // Celebrate the moment the last item gets ticked, not when opening a list that's already done.
