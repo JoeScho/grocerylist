@@ -33,6 +33,12 @@ export function Recipes({
     for (const r of recipes ?? []) for (const l of r.labels) c[l] = (c[l] ?? 0) + 1
     return c
   }, [recipes])
+  // Scored once per recipe list, and only while ordering by sustainability,
+  // which is also the only time the bar and percentage show.
+  const scores = useMemo(
+    () => (order === 'sustainability' && recipes ? new Map(recipes.map(r => [r.id, scoreRecipe(r.ingredients, month)])) : null),
+    [recipes, order, month],
+  )
   const filtered = useMemo(() => {
     if (!recipes) return recipes
     const q = search.trim().toLowerCase()
@@ -40,13 +46,8 @@ export function Recipes({
       (label === ALL || r.labels.includes(label)) &&
       (!q || r.title.toLowerCase().includes(q) || r.ingredients.some(i => i.toLowerCase().includes(q))),
     )
-    return orderRecipes(matches, order, { plan, month })
-  }, [recipes, search, label, order, plan, month])
-  // The bar and percentage only show while ordering by sustainability.
-  const scores = useMemo(
-    () => (order === 'sustainability' && filtered ? new Map(filtered.map(r => [r.id, scoreRecipe(r.ingredients, month)])) : null),
-    [filtered, order, month],
-  )
+    return orderRecipes(matches, order, { plan, month, scores: scores ?? undefined })
+  }, [recipes, search, label, order, plan, month, scores])
 
   return (
     <div className="screen">

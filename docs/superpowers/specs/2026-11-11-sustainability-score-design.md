@@ -43,7 +43,7 @@ The owner saw most of these in a playback and didn't change them. They are still
 - The choice is remembered on the device (local storage), not synced across the household. If storage is unavailable, fall back to Alphabetical.
 - Ordering applies after the existing search and label filter.
 - **Most used** orders by the number of meals in the `plan` collection marked cooked for that recipe, highest first. The Recipes screen already receives `plan`.
-- **Recently added** orders by `createdAt`, newest first. Recipes with no `createdAt` go last.
+- **Recently added** orders by `createdAt`, newest first. A recipe with no `createdAt` yet has just been saved and is waiting for the server's timestamp, so it goes first. (An earlier version of this design put it last; the code review showed that buried the recipe just added.)
 - **Sustainability** orders by score, highest first, using the unrounded score.
 - Ties in any ordering fall back to the existing alphabetical comparison.
 - Placement and styling of the control on the Recipes screen are the builder's choice. It should sit near the search box and label tabs and match the app's existing look.
@@ -73,7 +73,8 @@ Taken from the mockup the owner picked:
 - A line is scored when its normalised name matches an entry in the produce calendar below, unless one of these exclusions applies:
   - The existing `categorise` rules (without household overrides, which are about shop aisles) put it in an aisle other than `produce` or `misc`. This keeps "chopped tomatoes", "tomato puree", "coconut milk" and "black pepper" out. `misc` is allowed through because `categorise` doesn't know several calendar entries (swede, celeriac, chard, rhubarb, Brussels sprouts, broad beans, blackberries and others).
   - The original line text shows a preserved or processed form: dried, sun-dried, ground, powder, flakes, frozen, tinned or canned, pickled, sauce, puree or paste, ketchup. `parseIngredient` strips "ground" as a descriptor, so this check has to look at the raw line, not the normalised name.
-  - The name is a bare "pepper" and the line has no count (for example "pepper, to taste" or "freshly ground pepper"). That is the seasoning. "2 peppers" or "1 red pepper" is the vegetable.
+  - The match is "pepper" and the line neither counts it ("2 peppers") nor names the vegetable ("red pepper", "bell pepper"). "Pepper, to taste", "pinch of pepper" and "1/2 tsp white pepper" are the seasoning.
+  - The line is a heading: it ends with a colon or starts with "For the".
 - Sugar snap peas are scored even though `categorise` puts them in `pantry`; handle that as a named exception in the new module.
 - Lemon, lime and orange juice or zest count as the fruit, since recipes nearly always mean a squeezed or grated fresh one.
 - `src/lib/categories.ts` is not changed. Adding the missing produce keywords there would move items between aisles on the shop list, which is outside this work.
@@ -136,7 +137,7 @@ This is a draft I wrote from general knowledge of UK growing seasons. Before shi
 
 Garlic counts as a stored UK crop, in season all year. This is the owner's decision; an earlier draft listed it as an import.
 
-Generic words that `categorise` treats as produce ("salad", "herb", "berries") can be mapped to the nearest entry or left unrecognised; builder's choice.
+Generic words that `categorise` treats as produce ("salad", "herb", "berries") are left unrecognised. "Salad leaves" and "mixed leaves" count as lettuce.
 
 ## Non-goals
 

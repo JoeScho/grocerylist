@@ -27,6 +27,10 @@ describe('classifyIngredient', () => {
     ['150g sugar snap peas', 7, 'sugar-snap', 'in-season'],
     ['Handful of fresh mint', 7, 'mint', 'in-season'],
     ['1 bag salad leaves', NOV, 'lettuce', 'out-of-season'],
+    ['2 red chillies', AUG, 'chilli', 'in-season'],
+    ['2 mangoes', NOV, 'mango', 'imported'],
+    ['1 large pepper', AUG, 'pepper', 'in-season'],
+    ['Green pepper, sliced', AUG, 'pepper', 'in-season'],
   ])('%s in month %i -> %s %s', (line, month, id, status) => {
     expect(classifyIngredient(line, month)).toEqual({ id, status })
   })
@@ -38,6 +42,8 @@ describe('classifyIngredient', () => {
     'Pepper, to taste', 'Freshly ground pepper', '1 tsp pepper',
     '2 tbsp apple cider vinegar', '200g frozen peas',
     'For the salad:', '', '   ', '1 dragon fruit',
+    '1/2 tsp white pepper', 'Pinch of pepper', 'A good grind of pepper', 'Cracked pepper', '1 tsp Szechuan pepper',
+    'For the salad', 'FOR THE LEEKS', '**For the salad**', 'Salad', '2 tbsp salad dressing',
   ])('does not score %j', line => {
     expect(classifyIngredient(line, 8)).toBeNull()
   })

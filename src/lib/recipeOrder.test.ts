@@ -51,14 +51,21 @@ describe('orderRecipes', () => {
     expect(titles(orderRecipes(rs, 'sustainability', { plan: [], month: 8 }))).toEqual(['Greek salad', 'Thai curry'])
   })
 
-  it('recently added is newest first, with missing createdAt last', () => {
+  it('uses scores it is given instead of working them out again', () => {
+    const rs = [recipe('1', 'Leek soup', { ingredients: ['2 leeks'] }), recipe('2', 'Greek salad', { ingredients: ['4 tomatoes'] })]
+    const scores = new Map([['1', { score: 0.1, scored: 1 }], ['2', { score: 0.9, scored: 1 }]])
+    expect(titles(orderRecipes(rs, 'sustainability', { plan: [], month: 11, scores }))).toEqual(['Greek salad', 'Leek soup'])
+  })
+
+  // A recipe saved moments ago has a null createdAt until the server confirms it.
+  it('recently added is newest first, with a just-saved recipe at the top', () => {
     const rs = [
       recipe('1', 'Oldest', { createdAt: at(100) }),
-      recipe('2', 'Pending'),
+      recipe('2', 'Pending', { createdAt: null as unknown as Timestamp }),
       recipe('3', 'Newest', { createdAt: at(300) }),
       recipe('4', 'Middle', { createdAt: at(200) }),
     ]
-    expect(titles(orderRecipes(rs, 'recent', ctx))).toEqual(['Newest', 'Middle', 'Oldest', 'Pending'])
+    expect(titles(orderRecipes(rs, 'recent', ctx))).toEqual(['Pending', 'Newest', 'Middle', 'Oldest'])
   })
 
   it('does not mutate its input', () => {

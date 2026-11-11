@@ -49,14 +49,16 @@ const CALENDAR: Produce[] = [
   p('celery', [7, 10]),
   p('chard', [6, 10]),
   p('cherry', [6, 7]),
-  p('chilli', [7, 10], 'chilli', 'chili'),
+  // "chilly" and "mangoe" are what normaliseName makes of the plurals "chillies" and "mangoes".
+  p('chilli', [7, 10], 'chilli', 'chili', 'chilly'),
   p('courgette', [6, 9]),
   p('cucumber', [5, 9]),
   p('fennel', [6, 9]),
   p('green-bean', [7, 9], 'green bean', 'runner bean', 'french bean'),
   p('kale', [9, 3]),
   p('leek', [9, 3]),
-  p('lettuce', [5, 10], 'lettuce', 'rocket', 'salad leaf', 'mixed leaf', 'salad'),
+  // A bare "salad" is left out: it is usually a heading or part of "salad dressing".
+  p('lettuce', [5, 10], 'lettuce', 'rocket', 'salad leaf', 'mixed leaf'),
   p('mangetout', [6, 8]),
   p('sugar-snap', [6, 8], 'sugar snap pea', 'sugar snap'),
   p('pak-choi', [5, 10], 'pak choi', 'bok choy'),
@@ -77,7 +79,7 @@ const CALENDAR: Produce[] = [
 
   p('lemon', 'import'), p('lime', 'import'), p('orange', 'import'), p('clementine', 'import'),
   p('satsuma', 'import'), p('tangerine', 'import'), p('mandarin', 'import'), p('grapefruit', 'import'),
-  p('banana', 'import'), p('avocado', 'import'), p('mango', 'import'), p('pineapple', 'import'),
+  p('banana', 'import'), p('avocado', 'import'), p('mango', 'import', 'mango', 'mangoe'), p('pineapple', 'import'),
   p('melon', 'import'), p('kiwi', 'import'), p('pomegranate', 'import'), p('fig', 'import'),
   p('date', 'import'), p('grape', 'import'), p('peach', 'import'), p('nectarine', 'import'),
   p('apricot', 'import'), p('ginger', 'import'), p('lemongrass', 'import', 'lemongrass', 'lemon grass'),
@@ -90,6 +92,8 @@ const SKIPS_AISLE_CHECK = new Set(['sugar-snap'])
 // Dried, tinned and otherwise preserved forms aren't fresh produce. Checked on the
 // raw line because parseIngredient strips "ground" as a descriptor.
 const PROCESSED = /(^|[^a-z])(dried|sun-?dried|ground|powder(ed)?|flakes?|frozen|tinned|canned|tins?|cans?|pickled|sauce|pur[eé]e|paste|ketchup)(?![a-z])/i
+
+const PEPPER_VEG = /\b(red|green|yellow|orange|bell|mixed|romano|pointed|sweet|padron|jalapeno)\b/
 
 const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
@@ -118,16 +122,16 @@ function inSeason([from, to]: [number, number], month: number): boolean {
 
 export function classifyIngredient(line: string, month: number): ProduceMatch | null {
   const trimmed = line.trim()
-  // A trailing colon marks a heading such as "For the salad:".
-  if (!trimmed || trimmed.endsWith(':')) return null
+  // Headings such as "For the salad:" or "**For the sauce**" aren't ingredients.
+  if (!trimmed || trimmed.endsWith(':') || /^[^a-z0-9]*for the\b/i.test(trimmed)) return null
   if (PROCESSED.test(trimmed)) return null
 
   const { name, qty, unit } = parseIngredient(trimmed)
   const produce = findProduce(name)
   if (!produce) return null
 
-  // A bare "pepper" is the seasoning unless it is counted ("2 peppers").
-  if (produce.id === 'pepper' && name === 'pepper' && (qty === null || unit !== null)) return null
+  // "Pepper" is the seasoning unless it is counted ("2 peppers") or named as the vegetable ("red pepper").
+  if (produce.id === 'pepper' && !PEPPER_VEG.test(name) && (qty === null || unit !== null)) return null
 
   if (!SKIPS_AISLE_CHECK.has(produce.id)) {
     const aisle = categorise(name)

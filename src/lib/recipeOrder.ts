@@ -1,7 +1,7 @@
 // The ways the Recipes screen can be ordered, and the choice remembered on this device.
 
 import type { PlanEntry, Recipe } from '../types'
-import { scoreRecipe } from './seasons'
+import { scoreRecipe, type RecipeScore } from './seasons'
 
 export type RecipeOrder = 'alphabetical' | 'most-used' | 'sustainability' | 'recent'
 
@@ -20,7 +20,12 @@ function byRank(recipes: Recipe[], rank: (r: Recipe) => number): Recipe[] {
   return [...recipes].sort((a, b) => ranks.get(b.id)! - ranks.get(a.id)! || byTitle(a, b))
 }
 
-export function orderRecipes(recipes: Recipe[], order: RecipeOrder, ctx: { plan: PlanEntry[]; month: number }): Recipe[] {
+// `scores` lets a caller that has already scored the recipes avoid doing it twice.
+export function orderRecipes(
+  recipes: Recipe[],
+  order: RecipeOrder,
+  ctx: { plan: PlanEntry[]; month: number; scores?: Map<string, RecipeScore> },
+): Recipe[] {
   switch (order) {
     case 'most-used': {
       const cooked = new Map<string, number>()
@@ -28,10 +33,10 @@ export function orderRecipes(recipes: Recipe[], order: RecipeOrder, ctx: { plan:
       return byRank(recipes, r => cooked.get(r.id) ?? 0)
     }
     case 'sustainability':
-      return byRank(recipes, r => scoreRecipe(r.ingredients, ctx.month).score)
+      return byRank(recipes, r => (ctx.scores?.get(r.id) ?? scoreRecipe(r.ingredients, ctx.month)).score)
     case 'recent':
-      // A recipe that has just been saved has no server timestamp yet, so it sorts last until it arrives.
-      return byRank(recipes, r => r.createdAt?.toMillis() ?? -Infinity)
+      // A recipe saved moments ago has no server timestamp yet. It is the newest, so it goes first.
+      return byRank(recipes, r => r.createdAt?.toMillis() ?? Infinity)
     default:
       return [...recipes].sort(byTitle)
   }
