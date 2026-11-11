@@ -2,7 +2,10 @@ import { motion } from 'motion/react'
 import { useMemo, useState } from 'react'
 import { ALL, LabelTabs, labelColour } from '../components/LabelTabs'
 import { RecipeImage } from '../components/RecipeImage'
+import { ScoreBar } from '../components/ScoreBar'
 import { SettingsButton } from '../components/SettingsButton'
+import { loadRecipeOrder, orderRecipes, RECIPE_ORDERS, saveRecipeOrder, type RecipeOrder } from '../lib/recipeOrder'
+import { currentMonth, scoreLabel, scoreRecipe } from '../lib/seasons'
 import type { Household, PlanEntry, Recipe } from '../types'
 
 export function Recipes({
@@ -20,6 +23,9 @@ export function Recipes({
   settingsAlert: boolean
 }) {
   const [search, setSearch] = useState('')
+  const [order, setOrder] = useState<RecipeOrder>(loadRecipeOrder)
+  const [month] = useState(currentMonth)
+  const chooseOrder = (next: RecipeOrder) => { setOrder(next); saveRecipeOrder(next) }
   const inShop = useMemo(() => new Set(plan.filter(p => !p.cooked && p.itemIds.length > 0).map(p => p.recipeId)), [plan])
   const labels = household.recipeLabels
   const counts = useMemo(() => {
@@ -30,13 +36,17 @@ export function Recipes({
   const filtered = useMemo(() => {
     if (!recipes) return recipes
     const q = search.trim().toLowerCase()
-    return recipes
-      .filter(r =>
-        (label === ALL || r.labels.includes(label)) &&
-        (!q || r.title.toLowerCase().includes(q) || r.ingredients.some(i => i.toLowerCase().includes(q))),
-      )
-      .sort((a, b) => a.title.localeCompare(b.title, 'en-GB', { sensitivity: 'base', numeric: true }))
-  }, [recipes, search, label])
+    const matches = recipes.filter(r =>
+      (label === ALL || r.labels.includes(label)) &&
+      (!q || r.title.toLowerCase().includes(q) || r.ingredients.some(i => i.toLowerCase().includes(q))),
+    )
+    return orderRecipes(matches, order, { plan, month })
+  }, [recipes, search, label, order, plan, month])
+  // The bar and percentage only show while ordering by sustainability.
+  const scores = useMemo(
+    () => (order === 'sustainability' && filtered ? new Map(filtered.map(r => [r.id, scoreRecipe(r.ingredients, month)])) : null),
+    [filtered, order, month],
+  )
 
   return (
     <div className="screen">
@@ -46,6 +56,14 @@ export function Recipes({
       </div>
       {recipes && recipes.length > 0 && (
         <input className="search" placeholder="Search recipes or ingredients" value={search} onChange={e => setSearch(e.target.value)} />
+      )}
+      {recipes && recipes.length > 0 && (
+        <label className="order-by">
+          <span>Order by</span>
+          <select value={order} onChange={e => chooseOrder(e.target.value as RecipeOrder)}>
+            {RECIPE_ORDERS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </select>
+        </label>
       )}
       {recipes && recipes.length > 0 && (
         <LabelTabs labels={labels} counts={counts} value={label} onChange={onLabel} onManage={onManageLabels} />
@@ -81,12 +99,16 @@ export function Recipes({
               whileTap={{ scale: 0.96 }}
             >
               <RecipeImage className="thumb" src={r.image} seed={r.id} />
+              {scores?.has(r.id) && <ScoreBar score={scores.get(r.id)!} />}
               {inShop.has(r.id) && <span className="in-shop">In shop</span>}
               <div className="meta">
                 <div className="title">{r.title || 'Untitled recipe'}</div>
                 <div className="subtle" style={{ fontSize: 13, marginTop: 4 }}>
                   {r.ingredients.length} ingredients
                 </div>
+                {scores?.has(r.id) && (
+                  <div className="subtle" style={{ fontSize: 13, marginTop: 2 }}>{scoreLabel(scores.get(r.id)!)}</div>
+                )}
                 {r.labels.length > 0 && (
                   <div className="card-labels">
                     {r.labels.filter(l => labels.includes(l)).map(l => (
