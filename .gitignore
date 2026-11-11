@@ -7,3 +7,4 @@ functions/lib
 *.log
 .firebaserc
 *.tsbuildinfo
+.superpowers/
