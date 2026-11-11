@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { classifyIngredient } from './seasons'
+import { classifyIngredient, scoreLabel, scoreRecipe } from './seasons'
 
 const NOV = 11, AUG = 8
 
@@ -54,4 +54,41 @@ describe('classifyIngredient', () => {
   it('does not find apple inside pineapple', () => {
     expect(classifyIngredient('1 pineapple', 8)).toEqual({ id: 'pineapple', status: 'imported' })
   })
+})
+
+describe('scoreRecipe', () => {
+  const traybake = ['2 leeks', '500g potatoes', 'Juice of 1 lemon', '6 chicken thighs', '2 tbsp olive oil']
+  const curry = ['2 limes', 'Thumb of ginger', '2 stalks lemongrass', '400ml coconut milk']
+  const greek = ['4 tomatoes', '1 cucumber', '1 red pepper', '1 red onion', '200g feta']
+  const carbonara = ['400g spaghetti', '150g pancetta', '3 eggs', '50g parmesan']
+
+  it('matches the worked examples in the spec', () => {
+    expect(scoreRecipe(traybake, 11).score).toBeCloseTo(2.5 / 3)
+    expect(scoreRecipe(curry, 11).score).toBe(0.5)
+    expect(scoreRecipe(curry, 6).score).toBe(0.5)
+    expect(scoreRecipe(greek, 11).score).toBe(0.25)
+    expect(scoreRecipe(greek, 8).score).toBe(1)
+  })
+
+  it('gives a full score when there is no fresh produce', () => {
+    expect(scoreRecipe(carbonara, 11)).toEqual({ score: 1, scored: 0 })
+    expect(scoreRecipe([], 11)).toEqual({ score: 1, scored: 0 })
+  })
+
+  it('counts each produce once however often it appears', () => {
+    expect(scoreRecipe(['1 onion', '2 red onions', '2 courgettes'], 11)).toEqual({ score: 0.5, scored: 2 })
+  })
+
+  it('ignores produce it does not recognise', () => {
+    expect(scoreRecipe(['1 dragon fruit', '1 leek'], 11)).toEqual({ score: 1, scored: 1 })
+  })
+})
+
+describe('scoreLabel', () => {
+  it.each([
+    [{ score: 2.5 / 3, scored: 3 }, '83% sustainable'],
+    [{ score: 1, scored: 2 }, '100% sustainable'],
+    [{ score: 0, scored: 1 }, '0% sustainable'],
+    [{ score: 1, scored: 0 }, 'No fresh produce'],
+  ])('%j -> %s', (s, label) => expect(scoreLabel(s)).toBe(label))
 })

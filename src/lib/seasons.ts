@@ -140,6 +140,32 @@ export function classifyIngredient(line: string, month: number): ProduceMatch | 
   return { id: produce.id, status }
 }
 
+const CREDIT: Record<ProduceStatus, number> = { 'in-season': 1, imported: 0.5, 'out-of-season': 0 }
+
+export interface RecipeScore {
+  score: number // 0-1, unrounded
+  scored: number // distinct fresh produce counted
+}
+
+// Each produce counts once, whatever the quantity: ingredient lines are free
+// text, so weighting a squeeze of lemon against a kilo of leeks isn't reliable.
+export function scoreRecipe(ingredients: string[], month: number): RecipeScore {
+  const credits = new Map<string, number>()
+  for (const line of ingredients) {
+    const match = classifyIngredient(line, month)
+    if (match) credits.set(match.id, CREDIT[match.status])
+  }
+  // Nothing to judge counts as a full score rather than a bad one.
+  if (credits.size === 0) return { score: 1, scored: 0 }
+  let total = 0
+  for (const c of credits.values()) total += c
+  return { score: total / credits.size, scored: credits.size }
+}
+
+export function scoreLabel(s: RecipeScore): string {
+  return s.scored === 0 ? 'No fresh produce' : `${Math.round(s.score * 100)}% sustainable`
+}
+
 export function currentMonth(): number {
   return new Date().getMonth() + 1
 }
