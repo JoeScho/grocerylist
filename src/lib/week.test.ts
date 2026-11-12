@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { PlanEntry } from '../types'
-import { addDays, cookedDay, layoutWeek, openMealFor, toISODate, weekDays, weekStart } from './week'
+import { addDays, cookedDay, dragWeek, layoutWeek, openMealFor, toISODate, weekDays, weekStart } from './week'
 
 const meal = (id: string, over: Partial<PlanEntry> = {}): PlanEntry => ({
   id, recipeId: id, title: id, image: null, portions: 2, itemIds: [], cooked: false, day: null, cookedAt: null, ...over,
@@ -74,5 +74,30 @@ describe('layoutWeek', () => {
     const w = layoutWeek(plan, '2026-10-26', today)
     expect(w.tray?.map(m => m.id).sort()).toEqual(['missed', 'unplanned'])
     expect(w.days[0].meals.map(m => m.id)).toEqual(['nextMon'])
+  })
+})
+
+describe('dragWeek', () => {
+  const current = '2026-11-09' // a Monday
+
+  it('moves forward a week', () => {
+    expect(dragWeek(current, current, 1, 4)).toBe('2026-11-16')
+  })
+
+  it('moves back a week from a later one', () => {
+    expect(dragWeek('2026-11-23', current, -1, 4)).toBe('2026-11-16')
+  })
+
+  it('reaches the furthest week allowed and stops there', () => {
+    expect(dragWeek('2026-11-30', current, 1, 4)).toBe('2026-12-07')
+    expect(dragWeek('2026-12-07', current, 1, 4)).toBeNull()
+  })
+
+  it('does not go back into the past', () => {
+    expect(dragWeek(current, current, -1, 4)).toBeNull()
+  })
+
+  it('comes back to this week from next week', () => {
+    expect(dragWeek('2026-11-16', current, -1, 4)).toBe(current)
   })
 })

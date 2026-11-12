@@ -24,6 +24,14 @@ export function weekStart(iso: string): string {
   return addDays(iso, -((day + 6) % 7))
 }
 
+// Where a meal being dragged may go when held over a week arrow: forward up to the limit,
+// and back no further than this week, because past weeks are history and take no new meals.
+// Null means the arrow does nothing.
+export function dragWeek(start: string, current: string, step: 1 | -1, weeksAhead: number): string | null {
+  const next = addDays(start, 7 * step)
+  return next < current || next > addDays(current, 7 * weeksAhead) ? null : next
+}
+
 export function weekDays(start: string): string[] {
   return Array.from({ length: 7 }, (_, i) => addDays(start, i))
 }

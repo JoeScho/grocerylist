@@ -110,7 +110,8 @@ label.field { display: block; margin-bottom: 16px; }
 label.field > span { display: block; font-weight: var(--w-strong); font-size: 14px; margin: 0 0 6px 4px; color: var(--ink-soft); }
 
 /* Layout */
-.app { min-height: 100%; position: relative; overflow-x: hidden; }
+/* clip, not hidden, where supported: hidden would make this a scroll container and stop sticky children sticking. */
+.app { min-height: 100%; position: relative; overflow-x: hidden; overflow-x: clip; }
 .screen {
   min-height: 100%;
   padding: calc(var(--safe-t) + 20px) 16px calc(var(--nav-h) + var(--safe-b) + 28px);
@@ -360,6 +361,13 @@ label.field > span { display: block; font-weight: var(--w-strong); font-size: 14
 /* Week */
 .week-nav { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: -4px 0 12px; font-weight: var(--w-strong); text-align: center; }
 .week-nav .icon-btn:disabled { opacity: 0.3; }
+.week-nav.dragging { position: sticky; top: calc(var(--safe-t) + 10px); z-index: 20; background: var(--bg); box-shadow: 0 0 0 10px var(--bg); border-radius: var(--radius-sm); }
+/* A meal held over an arrow: it fills up over the time it takes to turn the week (DWELL_MS). */
+.week-nav .icon-btn.dwell { animation: dwell 0.9s ease-in infinite; }
+@keyframes dwell {
+  from { transform: scale(1); box-shadow: 0 0 0 0 var(--highlight); }
+  to { transform: scale(1.25); box-shadow: 0 0 0 10px var(--highlight); background: var(--highlight); color: var(--highlight-ink); }
+}
 .day { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); padding: 10px 10px 12px; margin-bottom: 12px; border: 3px solid transparent; transition: border-color 0.15s, background 0.15s; }
 .day.today { border-color: var(--highlight); }
 .day.tray { background: var(--tray-bg); border: 3px dashed var(--tray-line); }

@@ -7,11 +7,13 @@ import { SettingsButton } from '../components/SettingsButton'
 import { useToast } from '../components/Toast'
 import { useMealDrag } from '../components/useMealDrag'
 import { backfillCookedDays, deleteMeals, restoreSnapshot, setCooked, setMealDay, type Snapshot } from '../data/shop'
-import { addDays, parseISODate, toISODate, weekStart, layoutWeek } from '../lib/week'
+import { addDays, dragWeek, parseISODate, toISODate, weekStart, layoutWeek } from '../lib/week'
 import type { Household, PlanEntry, Recipe } from '../types'
 
 const WEEKS_AHEAD = 4
 const TRAY = 'tray'
+const PREV = 'prev'
+const NEXT = 'next'
 
 const dayName = (iso: string) => parseISODate(iso).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric' })
 const shortDate = (iso: string) => parseISODate(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
@@ -55,11 +57,20 @@ export function Week({
     backfillCookedDays(household.id, plan, today)
   }, [plan, household.id, today])
 
-  const { drag, over, start: startDrag } = useMealDrag((id, target) => {
-    const meal = plan.find(p => p.id === id)
-    const day = target === TRAY ? null : target
-    if (meal && meal.day !== day) setMealDay(household.id, id, day)
-  })
+  // Holding a dragged meal over a week arrow turns the page; it can then be dropped on a day there.
+  // Only the meal's day changes, so its ingredients stay on the shopping list.
+  const { drag, over, dwell, start: startDrag } = useMealDrag(
+    (id, target) => {
+      const meal = plan.find(p => p.id === id)
+      const day = target === TRAY ? null : target
+      if (meal && meal.day !== day) setMealDay(household.id, id, day)
+    },
+    key => {
+      const next = dragWeek(start, current, key === PREV ? -1 : 1, WEEKS_AHEAD)
+      if (next) setStart(next)
+    },
+  )
+  const canDrag = (step: 1 | -1) => dragWeek(start, current, step, WEEKS_AHEAD) !== null
 
   const inDays = days.flatMap(d => d.meals)
   const cooked = inDays.filter(p => p.cooked).length
@@ -111,15 +122,29 @@ export function Week({
         <SettingsButton onClick={onSettings} alert={settingsAlert} />
       </div>
 
-      <div className="week-nav">
-        <motion.button whileTap={{ scale: 0.85 }} className="icon-btn" onClick={() => setStart(addDays(start, -7))} aria-label="Previous week">‹</motion.button>
+      {/* While a meal is being dragged the arrows stay on screen so it can be carried to another week. */}
+      <div className={`week-nav ${drag ? 'dragging' : ''}`}>
+        <motion.button
+          whileTap={{ scale: 0.85 }}
+          className={`icon-btn ${dwell === PREV && canDrag(-1) ? 'dwell' : ''}`}
+          data-dwell={PREV}
+          onClick={() => setStart(addDays(start, -7))}
+          aria-label="Previous week"
+        >
+          ‹
+        </motion.button>
         <span className="subtle">
-          {shortDate(start)} – {shortDate(addDays(start, 6))}
-          {inDays.length > 0 && (past ? ` · ${cooked} cooked` : ` · ${cooked} of ${inDays.length} cooked`)}
+          {drag ? 'Hold over an arrow to change week' : (
+            <>
+              {shortDate(start)} – {shortDate(addDays(start, 6))}
+              {inDays.length > 0 && (past ? ` · ${cooked} cooked` : ` · ${cooked} of ${inDays.length} cooked`)}
+            </>
+          )}
         </span>
         <motion.button
           whileTap={{ scale: 0.85 }}
-          className="icon-btn"
+          className={`icon-btn ${dwell === NEXT && canDrag(1) ? 'dwell' : ''}`}
+          data-dwell={NEXT}
           disabled={start >= addDays(current, 7 * WEEKS_AHEAD)}
           onClick={() => setStart(addDays(start, 7))}
           aria-label="Next week"
@@ -139,7 +164,8 @@ export function Week({
         </div>
       )}
 
-      {nothingPlanned && (
+      {/* Hidden mid-drag: an empty week is exactly where a carried meal is headed. */}
+      {nothingPlanned && !drag && (
         <motion.div className="empty" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ paddingTop: 10, paddingBottom: 10 }}>
           <motion.span className="big emo" animate={{ rotate: [0, -8, 8, 0] }} transition={{ repeat: Infinity, duration: 2.4 }}><Emoji>📅</Emoji></motion.span>
           <h2>No meals planned</h2>
