@@ -21,7 +21,7 @@ export function LabelTabs({
   useEffect(() => {
     row.current?.querySelector('.label-tab.active')?.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' })
   }, [value])
-  const tabs = [{ id: ALL, label: 'All', colour: 'var(--ink)' }, ...labels.map(l => ({ id: l, label: l, colour: labelColour(labels, l) }))]
+  const tabs = [{ id: ALL, label: 'All', colour: 'var(--tab-all)' }, ...labels.map(l => ({ id: l, label: l, colour: labelColour(labels, l) }))]
   return (
     <div className="label-tabs" role="tablist" ref={row}>
       {tabs.map(t => {

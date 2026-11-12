@@ -1,5 +1,5 @@
 import { AnimatePresence, LayoutGroup, motion } from 'motion/react'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { Celebration } from '../components/Celebration'
 import { Check } from '../components/Check'
 import { useConfetti } from '../components/Confetti'
@@ -132,7 +132,7 @@ export function Shop({
 
       {total === 0 ? (
         <motion.div className="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-          <motion.span className="big" animate={{ y: [0, -10, 0] }} transition={{ repeat: Infinity, duration: 1.8 }}>🛒</motion.span>
+          <motion.span className="big emo" animate={{ y: [0, -10, 0] }} transition={{ repeat: Infinity, duration: 1.8 }}>🛒</motion.span>
           <h2>Your list is empty</h2>
           <p className="subtle">Add recipes from the Recipes tab, or type items above.</p>
         </motion.div>
@@ -140,8 +140,8 @@ export function Shop({
         <LayoutGroup>
           {groups.map(({ cat, items: list }) => (
             <motion.section className="cat" key={cat.id} layout>
-              <motion.div className="cat-head" style={{ background: cat.color }} layout>
-                <span>{cat.emoji}</span> {cat.label}
+              <motion.div className="cat-head" style={{ '--cat': cat.color } as CSSProperties} layout>
+                <span className="emo">{cat.emoji}</span> {cat.label}
                 <span className="count">{list.filter(i => !i.checked).length}</span>
               </motion.div>
               <motion.div className="items" layout>
@@ -212,7 +212,7 @@ export function Shop({
                   key={c.id}
                   whileTap={{ scale: 0.92 }}
                   className={`cat-option ${editing.category === c.id ? 'current' : ''}`}
-                  style={{ background: c.color }}
+                  style={{ '--cat': c.color } as CSSProperties}
                   onClick={async () => {
                     setEditing(null)
                     await Promise.all([
@@ -263,17 +263,17 @@ function Progress({ done, total }: { done: number; total: number }) {
   const pct = total ? done / total : 0
   return (
     <div className="progress">
-      <span className="subtle" style={{ fontWeight: 800 }}>{done}/{total}</span>
+      <span className="subtle" style={{ fontWeight: 'var(--w-strong)' }}>{done}/{total}</span>
       <svg width="52" height="52" viewBox="0 0 52 52">
         <circle cx="26" cy="26" r={r} fill="none" stroke="var(--line)" strokeWidth="7" />
         <motion.circle
-          cx="26" cy="26" r={r} fill="none" stroke="var(--mint)" strokeWidth="7" strokeLinecap="round"
+          cx="26" cy="26" r={r} fill="none" stroke="var(--ok)" strokeWidth="7" strokeLinecap="round"
           strokeDasharray={c}
           animate={{ strokeDashoffset: c * (1 - pct) }}
           transform="rotate(-90 26 26)"
           transition={{ type: 'spring', damping: 20 }}
         />
-        <text x="26" y="31" textAnchor="middle" fontSize="16">{pct === 1 ? '🎉' : '🛒'}</text>
+        <text className="emo" x="26" y="31" textAnchor="middle" fontSize="16">{pct === 1 ? '🎉' : '🛒'}</text>
       </svg>
     </div>
   )

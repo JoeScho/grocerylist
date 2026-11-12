@@ -76,7 +76,7 @@ export function LabelsSheet({
                 </form>
               ) : (
                 <>
-                  <span style={{ flex: 1, fontWeight: 800 }}>{l}</span>
+                  <span style={{ flex: 1, fontWeight: 'var(--w-strong)' }}>{l}</span>
                   <span className="subtle" style={{ fontSize: 14 }}>{recipes.filter(r => r.labels.includes(l)).length}</span>
                   <button className="text-btn" onClick={() => setEditing({ from: l, to: l })}>Rename</button>
                   <button className="text-btn danger" onClick={() => remove(l)} aria-label={`Delete ${l}`}>✕</button>

@@ -1,6 +1,7 @@
 import { AnimatePresence, LayoutGroup, motion, useDragControls } from 'motion/react'
 import { useEffect, useMemo, useRef } from 'react'
 import { useConfetti } from '../components/Confetti'
+import { Emoji } from '../components/Emoji'
 import { RecipeImage } from '../components/RecipeImage'
 import { SettingsButton } from '../components/SettingsButton'
 import { useToast } from '../components/Toast'
@@ -140,7 +141,7 @@ export function Week({
 
       {nothingPlanned && (
         <motion.div className="empty" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ paddingTop: 10, paddingBottom: 10 }}>
-          <motion.span className="big" animate={{ rotate: [0, -8, 8, 0] }} transition={{ repeat: Infinity, duration: 2.4 }}>📅</motion.span>
+          <motion.span className="big emo" animate={{ rotate: [0, -8, 8, 0] }} transition={{ repeat: Infinity, duration: 2.4 }}>📅</motion.span>
           <h2>No meals planned</h2>
           <p className="subtle">Recipes you add to the shop land here, ready to drag onto a day.</p>
           <button className="btn" onClick={onBrowse} style={{ marginTop: 12 }}>Pick some recipes</button>
@@ -151,7 +152,7 @@ export function Week({
         {tray && !nothingPlanned && (
           <section className={`day tray ${over === TRAY ? 'over' : ''}`} data-drop={TRAY}>
             <div className="day-head">
-              <span>📥 To plan</span>
+              <span><Emoji>📥</Emoji> To plan</span>
               <span className="subtle" style={{ fontSize: 13 }}>Drag ⠿ onto a day</span>
             </div>
             <div className="day-meals">
@@ -222,7 +223,7 @@ function MealCard({
       exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.15 } }}
       transition={{ type: 'spring', damping: 24, stiffness: 300 }}
     >
-      {!readOnly && <div className="swipe-bin">🗑️</div>}
+      {!readOnly && <div className="swipe-bin"><Emoji alt="Remove">🗑️</Emoji></div>}
       <motion.div
         className={`week-card ${meal.cooked ? 'cooked' : ''}`}
         drag={readOnly ? false : 'x'}
@@ -260,7 +261,7 @@ function MealCard({
             transition={{ duration: 0.4 }}
             aria-label={meal.cooked ? `Mark ${meal.title} as not cooked` : `Mark ${meal.title} as cooked`}
           >
-            {meal.cooked ? '✓' : '🍳'}
+            {meal.cooked ? '✓' : <Emoji>🍳</Emoji>}
           </motion.button>
         )}
         {!readOnly && !meal.cooked && (

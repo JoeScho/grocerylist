@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from 'motion/react'
-import { useState } from 'react'
+import { useState, type CSSProperties } from 'react'
+import { Emoji } from '../components/Emoji'
 import { labelColour } from '../components/LabelTabs'
 import { RecipeImage } from '../components/RecipeImage'
 import { ScoreBar } from '../components/ScoreBar'
@@ -59,8 +60,8 @@ export function RecipeDetail({
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.8 }}
                 >
-                  <button className="text-btn" style={{ display: 'block', width: '100%', textAlign: 'left', padding: 10 }} onClick={onEdit}>✏️ Edit</button>
-                  <button className="text-btn danger" style={{ display: 'block', width: '100%', textAlign: 'left', padding: 10 }} onClick={() => confirm('Delete this recipe?') && onDelete()}>🗑️ Delete</button>
+                  <button className="text-btn" style={{ display: 'block', width: '100%', textAlign: 'left', padding: 10 }} onClick={onEdit}><Emoji>✏️</Emoji> Edit</button>
+                  <button className="text-btn danger" style={{ display: 'block', width: '100%', textAlign: 'left', padding: 10 }} onClick={() => confirm('Delete this recipe?') && onDelete()}><Emoji>🗑️</Emoji> Delete</button>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -71,11 +72,11 @@ export function RecipeDetail({
       <h1 className="detail-title">{recipe.title}</h1>
       <div className="chips">
         {recipe.labels.filter(l => household.recipeLabels.includes(l)).map(l => (
-          <span key={l} className="chip" style={{ background: labelColour(household.recipeLabels, l), color: '#fff', boxShadow: 'none' }}>{l}</span>
+          <span key={l} className="chip" style={{ background: labelColour(household.recipeLabels, l), color: 'var(--on-color)', boxShadow: 'none', borderColor: 'transparent' }}>{l}</span>
         ))}
-        {recipe.servings && <span className="chip">🍽️ Serves {recipe.servings}</span>}
-        {host && <a className="chip" href={recipe.sourceUrl!} target="_blank" rel="noreferrer">🔗 {host}</a>}
-        {inShop && <span className="chip" style={{ background: 'var(--mint)', color: '#fff', boxShadow: '0 3px 0 #2aa955' }}>🛒 In shop · {planEntry.portions} portions</span>}
+        {recipe.servings && <span className="chip"><Emoji>🍽️</Emoji> Serves {recipe.servings}</span>}
+        {host && <a className="chip" href={recipe.sourceUrl!} target="_blank" rel="noreferrer"><Emoji>🔗</Emoji> {host}</a>}
+        {inShop && <span className="chip ok"><Emoji>🛒</Emoji> In shop · {planEntry.portions} portions</span>}
       </div>
 
       <Tabs
@@ -105,7 +106,7 @@ export function RecipeDetail({
               const season = classifyIngredient(text, month)
               return (
                 <motion.li key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.025 }}>
-                  <span className="dot" style={{ background: cat.color }} />
+                  <span className="dot" style={{ '--cat': cat.color } as CSSProperties} />
                   <span className="txt">{text}</span>
                   {season && <span className={`season-tag ${season.status}`}>{STATUS_LABEL[season.status]}</span>}
                   <button
@@ -144,7 +145,7 @@ export function RecipeDetail({
 
       {(cookNow || inShop) && (
         <div className="row" style={{ justifyContent: 'center', marginTop: 18, flexWrap: 'wrap' }}>
-          {cookNow && <button className="btn small ghost" onClick={onAddToShop}>🛒 {inShop ? 'Update in shop' : 'Add to shop'}</button>}
+          {cookNow && <button className="btn small ghost" onClick={onAddToShop}><Emoji>🛒</Emoji> {inShop ? 'Update in shop' : 'Add to shop'}</button>}
           {inShop && <button className="btn small ghost danger" onClick={onRemoveFromShop}>Remove from shop</button>}
         </div>
       )}
@@ -153,11 +154,11 @@ export function RecipeDetail({
       <div className="sticky-cta">
         {cookNow ? (
           <motion.button className="btn block mint" onClick={onCooked} whileTap={{ scale: 0.97 }} initial={{ y: 80 }} animate={{ y: 0 }} transition={{ type: 'spring', delay: 0.2 }}>
-            🍳 Cooked!
+            <Emoji>🍳</Emoji> Cooked!
           </motion.button>
         ) : (
           <motion.button className="btn block" onClick={onAddToShop} whileTap={{ scale: 0.97 }} initial={{ y: 80 }} animate={{ y: 0 }} transition={{ type: 'spring', delay: 0.2 }}>
-            🛒 {inShop ? 'Update in shop' : 'Add to shop'}
+            <Emoji>🛒</Emoji> {inShop ? 'Update in shop' : 'Add to shop'}
           </motion.button>
         )}
       </div>

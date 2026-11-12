@@ -34,7 +34,7 @@ export function SignIn() {
       {FLOATERS.map(f => (
         <motion.span
           key={f.e}
-          className="float"
+          className="float emo"
           style={{ left: f.x, top: f.y }}
           animate={{ y: [0, -18, 0], rotate: [0, 10, -6, 0] }}
           transition={{ duration: 4, repeat: Infinity, delay: f.d, ease: 'easeInOut' }}
@@ -44,7 +44,7 @@ export function SignIn() {
       ))}
       <div>
         <motion.span
-          className="logo"
+          className="logo emo"
           initial={{ scale: 0, rotate: -30 }}
           animate={{ scale: 1, rotate: 0 }}
           transition={{ type: 'spring', stiffness: 260, damping: 12 }}

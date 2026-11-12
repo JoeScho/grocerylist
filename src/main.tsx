@@ -6,8 +6,10 @@ import App from './App'
 import { ConfettiProvider } from './components/Confetti'
 import { ToastProvider } from './components/Toast'
 import './lib/install'
+import { initTheme } from './lib/theme'
 import './styles.css'
 
+initTheme()
 registerSW({ immediate: true })
 
 createRoot(document.getElementById('root')!).render(

@@ -65,7 +65,7 @@ export function AddToShopSheet({
             <li key={i} onClick={() => setSelected(s => s.map((v, j) => (j === i ? !v : v)))} style={{ cursor: 'pointer' }}>
               <Check on={!!selected[i]} />
               <span className="txt" style={{ opacity: selected[i] ? 1 : 0.5 }}>
-                <span style={{ textTransform: 'capitalize', fontWeight: 800 }}>{p.name}</span>
+                <span style={{ textTransform: 'capitalize', fontWeight: 'var(--w-strong)' }}>{p.name}</span>
                 {qty !== null && <span className="subtle"> · {formatQty(qty, p.unit)}</span>}
               </span>
               {staple && <span className="staple-tag">Staple</span>}

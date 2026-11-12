@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { useState } from 'react'
+import { Emoji } from '../components/Emoji'
 import { FieldTools } from '../components/FieldTools'
 import { Sheet } from '../components/Sheet'
 import { importFromUrl } from '../data/recipes'
@@ -91,7 +92,7 @@ export function AddRecipeSheet({
         {mode === 'link' && (
           <motion.div key="link" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 30 }}>
             <button className="text-btn" onClick={() => setMode('choose')}>← Back</button>
-            <h2 style={{ marginTop: 6 }}>🔗 Paste a link</h2>
+            <h2 style={{ marginTop: 6 }}><Emoji>🔗</Emoji> Paste a link</h2>
             {error && <div className="error-box">{error}</div>}
             {looksInstagram && <div className="hint">Instagram won't let apps read posts. Use “From Instagram” and paste the caption, or open the website link from the post.</div>}
             <label className="field">
@@ -109,7 +110,7 @@ export function AddRecipeSheet({
         {mode === 'caption' && (
           <motion.div key="caption" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 30 }}>
             <button className="text-btn" onClick={() => setMode('choose')}>← Back</button>
-            <h2 style={{ marginTop: 6 }}>📸 Paste the caption</h2>
+            <h2 style={{ marginTop: 6 }}><Emoji>📸</Emoji> Paste the caption</h2>
             <label className="field">
               <span>Caption text</span>
               <FieldTools value={caption} onChange={setCaption}>
@@ -140,7 +141,7 @@ function Cooking() {
   return (
     <span className="row" style={{ gap: 6 }}>
       {['🍳', '🥄', '🔥'].map((e, i) => (
-        <motion.span key={e} animate={{ y: [0, -8, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: i * 0.12 }}>{e}</motion.span>
+        <motion.span key={e} className="emo" animate={{ y: [0, -8, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: i * 0.12 }}>{e}</motion.span>
       ))}
       <span style={{ marginLeft: 6 }}>Fetching…</span>
     </span>

@@ -83,7 +83,7 @@ export function RecipeEditor({
           </div>
         ) : (
           <button className="img-drop" onClick={() => fileInput.current?.click()}>
-            <span><span style={{ fontSize: 40, display: 'block' }}>📷</span>Add a photo</span>
+            <span><span className="emo" style={{ fontSize: 40, display: 'block' }}>📷</span>Add a photo</span>
           </button>
         )}
       </div>
@@ -96,7 +96,7 @@ export function RecipeEditor({
       </label>
       {labels.length > 0 && (
         <div className="field">
-          <span style={{ display: 'block', fontWeight: 800, fontSize: 14, margin: '0 0 8px 4px', color: 'var(--ink-soft)' }}>Labels</span>
+          <span style={{ display: 'block', fontWeight: 'var(--w-strong)', fontSize: 14, margin: '0 0 8px 4px', color: 'var(--ink-soft)' }}>Labels</span>
           <div className="label-picker">
             {labels.map(l => {
               const on = chosen.includes(l)

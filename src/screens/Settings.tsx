@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import { useState } from 'react'
 import { signOut, type User } from 'firebase/auth'
 import { auth } from '../firebase'
+import { Emoji } from '../components/Emoji'
 import { FieldTools } from '../components/FieldTools'
 import { useToast } from '../components/Toast'
 import {
@@ -9,6 +10,7 @@ import {
 } from '../data/household'
 import { isIos, isStandalone, useInstallPrompt } from '../lib/install'
 import { normaliseName } from '../lib/ingredients'
+import { setTheme, THEMES, useTheme } from '../lib/theme'
 import type { Household } from '../types'
 
 interface Invite { id: string; name: string; ownerEmail: string }
@@ -19,6 +21,7 @@ export function Settings({
   user, household, invites, onBack,
 }: { user: User; household: Household; invites: Invite[]; onBack: () => void }) {
   const toast = useToast()
+  const theme = useTheme()
   const { available, install } = useInstallPrompt()
   const [email, setEmail] = useState('')
   const [staple, setStaple] = useState('')
@@ -58,8 +61,8 @@ export function Settings({
 
       <AnimatePresence>
         {invites.map(inv => (
-          <motion.div key={inv.id} className="card section" style={{ background: 'var(--sun)' }} initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
-            <h3 style={{ marginBottom: 6 }}>💌 You've been invited</h3>
+          <motion.div key={inv.id} className="card section invite" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+            <h3 style={{ marginBottom: 6 }}><Emoji>💌</Emoji> You've been invited</h3>
             <p style={{ margin: '0 0 12px' }}>{inv.ownerEmail} shared “{inv.name}” with you.</p>
             <button className="btn small" onClick={() => switchHousehold(user.uid, inv.id)}>Switch to this list</button>
           </motion.div>
@@ -67,8 +70,8 @@ export function Settings({
       </AnimatePresence>
 
       {!isStandalone() && (
-        <div className="card section" style={{ background: 'linear-gradient(135deg, #ffe3ef, #e5f4ff)' }}>
-          <h3 style={{ marginBottom: 6 }}>📲 Put Schoceries on your home screen</h3>
+        <div className="card section promo">
+          <h3 style={{ marginBottom: 6 }}><Emoji>📲</Emoji> Put Schoceries on your home screen</h3>
           {available ? (
             <button className="btn small grape" onClick={install}>Install app</button>
           ) : isIos() ? (
@@ -80,7 +83,30 @@ export function Settings({
       )}
 
       <div className="card section">
-        <h3 style={{ marginBottom: 10 }}>🏡 Household</h3>
+        <h3 style={{ marginBottom: 6 }}><Emoji>🎨</Emoji> Look</h3>
+        <p className="subtle" style={{ marginTop: 0 }}>Changes how the app looks on this device only.</p>
+        <div className="theme-list" role="radiogroup" aria-label="Look">
+          {THEMES.map(t => (
+            <button
+              key={t.value}
+              role="radio"
+              aria-checked={theme.value === t.value}
+              className={`theme-choice ${theme.value === t.value ? 'on' : ''}`}
+              onClick={() => setTheme(t.value)}
+            >
+              <span className="theme-swatch" style={{ background: t.swatch[0] }}>
+                <i style={{ background: t.swatch[1] }} />
+                <i style={{ background: t.swatch[2] }} />
+              </span>
+              <span className="theme-name">{t.label}<small>{t.blurb}</small></span>
+              <span className="theme-tick" aria-hidden>✓</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="card section">
+        <h3 style={{ marginBottom: 10 }}><Emoji>🏡</Emoji> Household</h3>
         <form className="add-item" style={{ marginBottom: 6 }} onSubmit={e => { e.preventDefault(); renameHousehold(household, name.trim() || household.name); toast('Renamed') }}>
           <input value={name} onChange={e => setName(e.target.value)} />
           {name !== household.name && <button className="btn small" type="submit">Save</button>}
@@ -89,7 +115,7 @@ export function Settings({
         {household.memberEmails.map((m, i) => (
           <div className="member" key={m}>
             <span className="avatar" style={{ background: AVATAR_COLOURS[i % AVATAR_COLOURS.length] }}>{m[0].toUpperCase()}</span>
-            <span style={{ flex: 1, fontWeight: 700, wordBreak: 'break-all' }}>
+            <span style={{ flex: 1, fontWeight: 'var(--w-mid)', wordBreak: 'break-all' }}>
               {m}
               {m === household.ownerEmail && <span className="subtle" style={{ fontSize: 13 }}> · owner</span>}
               {m === me && <span className="subtle" style={{ fontSize: 13 }}> · you</span>}
@@ -115,7 +141,7 @@ export function Settings({
       </div>
 
       <div className="card section">
-        <h3 style={{ marginBottom: 6 }}>⭐ Cupboard staples</h3>
+        <h3 style={{ marginBottom: 6 }}><Emoji>⭐</Emoji> Cupboard staples</h3>
         <p className="subtle" style={{ marginTop: 0 }}>These start unticked when you add a recipe to the shop. You can still tick them if you've run out.</p>
         <form className="add-item" onSubmit={e => { e.preventDefault(); addStapleItem() }}>
           <input placeholder="e.g. soy sauce" value={staple} onChange={e => setStaple(e.target.value)} />
