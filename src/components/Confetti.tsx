@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { createContext, useCallback, useContext, useState, type ReactNode } from 'react'
 import { useTheme } from '../lib/theme'
+import { EmojiGlyph } from './Emoji'
 
 const BITS = ['🥕', '🍋', '🥑', '🍅', '🧄', '🌶️', '🥦', '🍓', '🧀', '🥖', '✨', '🎉']
 
@@ -65,7 +66,7 @@ export function ConfettiProvider({ children }: { children: ReactNode }) {
                   }}
                   transition={{ duration: 1.4, ease: 'easeOut' }}
                 >
-                  {BITS[i % BITS.length]}
+                  <EmojiGlyph>{BITS[i % BITS.length]}</EmojiGlyph>
                 </motion.span>
               )
             })}

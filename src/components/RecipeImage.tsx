@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { EmojiGlyph } from './Emoji'
 
 const FALLBACKS = ['🍝', '🥘', '🍲', '🥗', '🌮', '🍛', '🍜', '🥙']
 const TINTS = ['#ffe3e3', '#fff1c2', '#dcf7e6', '#dff2ff', '#efe1ff', '#ffe0ef']
@@ -17,7 +18,7 @@ export function RecipeImage({ src, seed, className }: { src: string | null; seed
   }
   return (
     <div className={`${className ?? ''} placeholder`} style={{ background: pick(TINTS, seed) }}>
-      {pick(FALLBACKS, seed)}
+      <EmojiGlyph>{pick(FALLBACKS, seed)}</EmojiGlyph>
     </div>
   )
 }

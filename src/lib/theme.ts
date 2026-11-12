@@ -11,6 +11,8 @@ export interface ThemeInfo {
   blurb: string
   // Food emoji as decoration. Themes without it show line icons or nothing.
   emoji: boolean
+  // Redraw emoji as 16x16 pixel art.
+  pixelEmoji: boolean
   // What a small win looks like: emoji confetti, or a quiet drawn tick.
   celebration: 'confetti' | 'flourish'
   // Page background, primary colour and highlight, for the picker swatch and the browser bar.
@@ -18,11 +20,11 @@ export interface ThemeInfo {
 }
 
 export const THEMES: ThemeInfo[] = [
-  { value: 'fun', label: 'Fun', blurb: 'Bright, bubbly and bouncy', emoji: true, celebration: 'confetti', swatch: ['#fff8ef', '#ff5a5f', '#ffd23f'] },
-  { value: 'elegant', label: 'Elegant', blurb: 'Serif type on warm ivory', emoji: false, celebration: 'flourish', swatch: ['#efe7d8', '#241f19', '#8a6a35'] },
-  { value: 'midnight', label: 'Midnight', blurb: 'Dark, with deep green', emoji: false, celebration: 'flourish', swatch: ['#0f1412', '#2e7d4f', '#5fbf8a'] },
-  { value: 'market', label: 'Market', blurb: 'Greengrocer paper and ink', emoji: true, celebration: 'confetti', swatch: ['#efe6d5', '#2f5d3a', '#f0c75e'] },
-  { value: 'retro', label: 'Retro', blurb: 'Seventies orange and mustard', emoji: true, celebration: 'confetti', swatch: ['#f3e3c3', '#d9541e', '#e9a820'] },
+  { value: 'fun', label: 'Fun', blurb: 'Bright, bubbly and bouncy', emoji: true, pixelEmoji: false, celebration: 'confetti', swatch: ['#fff8ef', '#ff5a5f', '#ffd23f'] },
+  { value: 'elegant', label: 'Elegant', blurb: 'Serif type on warm ivory', emoji: false, pixelEmoji: false, celebration: 'flourish', swatch: ['#efe7d8', '#241f19', '#8a6a35'] },
+  { value: 'midnight', label: 'Midnight', blurb: 'Dark, with deep green', emoji: false, pixelEmoji: false, celebration: 'flourish', swatch: ['#0f1412', '#2e7d4f', '#5fbf8a'] },
+  { value: 'market', label: 'Market', blurb: 'Greengrocer paper and ink', emoji: true, pixelEmoji: false, celebration: 'confetti', swatch: ['#efe6d5', '#2f5d3a', '#f0c75e'] },
+  { value: 'retro', label: 'Retro', blurb: '8-bit pixels on arcade dark', emoji: true, pixelEmoji: true, celebration: 'confetti', swatch: ['#1a1c2c', '#b13e53', '#ffcd75'] },
 ]
 
 const DEFAULT: Theme = 'fun'
@@ -53,6 +55,19 @@ const EMOJI = /[\p{Extended_Pictographic}‍️]+\s*/gu
 
 // For themes without emoji: "🛒 Ragu added" becomes "Ragu added".
 export const stripEmoji = (text: string): string => text.replace(EMOJI, '').trim()
+
+// "🛒 Ragu added" becomes [emoji "🛒", text " Ragu added"], so each emoji can be drawn on its own.
+export function splitEmoji(text: string): { text: string; emoji: boolean }[] {
+  const parts: { text: string; emoji: boolean }[] = []
+  let last = 0
+  for (const match of text.matchAll(/[\p{Extended_Pictographic}\u200D\uFE0F]+/gu)) {
+    if (match.index > last) parts.push({ text: text.slice(last, match.index), emoji: false })
+    parts.push({ text: match[0], emoji: true })
+    last = match.index + match[0].length
+  }
+  if (last < text.length) parts.push({ text: text.slice(last), emoji: false })
+  return parts
+}
 
 let current: Theme = DEFAULT
 const listeners = new Set<() => void>()

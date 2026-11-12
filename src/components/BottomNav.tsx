@@ -1,5 +1,6 @@
 import { motion } from 'motion/react'
 import type { ReactNode } from 'react'
+import { Emoji } from './Emoji'
 
 export type Tab = 'recipes' | 'week' | 'shop'
 
@@ -25,7 +26,7 @@ export function BottomNav({
         <button key={t.id} onClick={() => onChange(t.id)} aria-current={tab === t.id ? 'page' : undefined}>
           {tab === t.id && <motion.div layoutId="nav-pill" className="pill" transition={{ type: 'spring', damping: 22, stiffness: 320 }} />}
           <span className="nav-icon">
-            <span className="emo">{t.emoji}</span>
+            <Emoji>{t.emoji}</Emoji>
             <span className="emo-alt">{t.icon}</span>
           </span>
           <span>{t.label}</span>

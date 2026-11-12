@@ -1,5 +1,6 @@
 import { motion } from 'motion/react'
 import { useMemo, useState } from 'react'
+import { Emoji } from '../components/Emoji'
 import { ALL, LabelTabs, labelColour } from '../components/LabelTabs'
 import { RecipeImage } from '../components/RecipeImage'
 import { ScoreBar } from '../components/ScoreBar'
@@ -75,14 +76,14 @@ export function Recipes({
         <Loading />
       ) : recipes?.length === 0 ? (
         <motion.div className="empty" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-          <motion.span className="big emo" animate={{ rotate: [0, -10, 10, 0] }} transition={{ repeat: Infinity, duration: 2.5 }}>🍳</motion.span>
+          <motion.span className="big emo" animate={{ rotate: [0, -10, 10, 0] }} transition={{ repeat: Infinity, duration: 2.5 }}><Emoji>🍳</Emoji></motion.span>
           <h2>No recipes yet</h2>
           <p className="subtle">Paste a link, an Instagram caption, or write one yourself.</p>
           <button className="btn" onClick={onAdd} style={{ marginTop: 12 }}>Add your first recipe</button>
         </motion.div>
       ) : filtered.length === 0 ? (
         <motion.div className="empty" key={label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} style={{ paddingTop: 30 }}>
-          <span className="big emo">🔍</span>
+          <span className="big emo"><Emoji>🔍</Emoji></span>
           <p className="subtle">
             {search ? `Nothing matches “${search}”${label !== ALL ? ` in ${label}` : ''}.` : `No ${label} recipes yet. Tap the + to add one, or label an existing recipe when you edit it.`}
           </p>
@@ -142,7 +143,7 @@ export function Recipes({
 export function Loading() {
   return (
     <div className="loader">
-      <motion.span className="loader-spin" animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1.2, ease: 'linear' }}><span className="emo">🍋</span></motion.span>
+      <motion.span className="loader-spin" animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1.2, ease: 'linear' }}><Emoji>🍋</Emoji></motion.span>
     </div>
   )
 }

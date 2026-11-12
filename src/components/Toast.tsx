@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from 'motion/react'
-import { stripEmoji, useTheme } from '../lib/theme'
+import { splitEmoji, stripEmoji, useTheme } from '../lib/theme'
+import { EmojiGlyph } from './Emoji'
 import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from 'react'
 
 interface ToastAction { label: string; onClick: () => void }
@@ -10,7 +11,7 @@ export const useToast = () => useContext(ToastContext)
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [message, setMessage] = useState<{ id: number; text: string; action?: ToastAction } | null>(null)
-  const { emoji } = useTheme()
+  const { emoji, pixelEmoji } = useTheme()
   const timer = useRef<number | undefined>(undefined)
   const show = useCallback((text: string, action?: ToastAction) => {
     window.clearTimeout(timer.current)
@@ -32,7 +33,9 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               exit={{ y: -40, opacity: 0 }}
               transition={{ type: 'spring', damping: 18, stiffness: 320 }}
             >
-              {emoji ? message.text : stripEmoji(message.text)}
+              {!emoji ? stripEmoji(message.text)
+                : !pixelEmoji ? message.text
+                : <span>{splitEmoji(message.text).map((part, i) => (part.emoji ? <EmojiGlyph key={i}>{part.text}</EmojiGlyph> : part.text))}</span>}
               {message.action && (
                 <button
                   className="toast-action"

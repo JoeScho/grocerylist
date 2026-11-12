@@ -1,3 +1,4 @@
+import { EmojiGlyph } from './Emoji'
 import { useRef, type ReactNode } from 'react'
 import { useToast } from './Toast'
 
@@ -61,7 +62,7 @@ export function FieldTools({
           {showClear ? (
             <button type="button" onPointerDown={e => e.preventDefault()} onClick={clear} aria-label="Clear" title="Clear">✕</button>
           ) : (
-            <button type="button" onPointerDown={e => e.preventDefault()} onClick={paste} aria-label="Paste" title="Paste">📋</button>
+            <button type="button" onPointerDown={e => e.preventDefault()} onClick={paste} aria-label="Paste" title="Paste"><EmojiGlyph>📋</EmojiGlyph></button>
           )}
         </div>
       )}

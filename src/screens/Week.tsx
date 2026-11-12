@@ -141,7 +141,7 @@ export function Week({
 
       {nothingPlanned && (
         <motion.div className="empty" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ paddingTop: 10, paddingBottom: 10 }}>
-          <motion.span className="big emo" animate={{ rotate: [0, -8, 8, 0] }} transition={{ repeat: Infinity, duration: 2.4 }}>📅</motion.span>
+          <motion.span className="big emo" animate={{ rotate: [0, -8, 8, 0] }} transition={{ repeat: Infinity, duration: 2.4 }}><Emoji>📅</Emoji></motion.span>
           <h2>No meals planned</h2>
           <p className="subtle">Recipes you add to the shop land here, ready to drag onto a day.</p>
           <button className="btn" onClick={onBrowse} style={{ marginTop: 12 }}>Pick some recipes</button>

@@ -603,41 +603,69 @@ label.field > span { display: block; font-weight: var(--w-strong); font-size: 14
   .celebration-card { border-radius: 8px; }
 }
 
-/* Retro */
+/* Retro: 8-bit. Square pixels, an arcade palette on dark, white outlines. */
 :root[data-theme='retro'] {
-  --coral: #d9541e; --coral-dark: #a63c12; --sun: #e9a820; --mint: #5f8a3a; --sky: #2f8fa3; --grape: #7a4a8c; --pink: #d9486e; --orange: #e07b1a;
-  --bg: #f3e3c3; --card: #fff4dc; --surface: #fff4dc; --ink: #3b2314; --ink-soft: #80644c; --line: #e0c99d;
-  --edge: 2.5px; --hard: 4px 4px 0 var(--ink); --hard-sm: 3px 3px 0 var(--ink);
-  --shadow: 4px 4px 0 var(--ink); --radius: 16px; --radius-sm: 12px; --pill: 999px; --border-w: 2.5px;
-  --primary: #d9541e; --primary-edge: var(--ink); --danger: #b8401a;
-  --accent: #1f7a78; --accent-edge: var(--ink); --accent-soft: rgba(31, 122, 120, 0.14); --focus-ring: rgba(31, 122, 120, 0.22);
-  --highlight: #e9a820; --highlight-edge: var(--ink); --highlight-ink: var(--ink);
-  --ok: #5f8a3a; --ok-edge: var(--ink); --on-color: #fff4dc;
-  --nav-bg: var(--ink); --nav-ink: #fff4dc; --toast-action: #e9a820; --tab-all: var(--ink);
-  --score: linear-gradient(90deg, #d9541e, #e9a820 50%, #5f8a3a);
-  --good-ink: #44682a; --warn-ink: #7a560a; --bad-ink: #a63c12;
-  --tray-bg: #f8ebcd; --tray-line: var(--ink); --over-bg: #e3ecc8; --error-bg: #f6d2bf; --error-ink: #8a2f0e; --hint-bg: #f7dc94;
-  --invite-bg: #e9a820; --promo-bg: #f7dc94; --cat-keep: 68%; --cat-tone: #5a3212;
-  --signin-bg: repeating-conic-gradient(from 0deg at 50% 40%, #f3e3c3 0 12deg, #efd6a6 12deg 24deg);
-  --font-head: 'Caprasimo', Georgia, serif; --font-body: 'Work Sans', system-ui, sans-serif;
-  --w-body: 500; --w-mid: 600; --w-strong: 600; --w-head: 400;
+  color-scheme: dark;
+  --coral: #b13e53; --coral-dark: #7a2a3a; --sun: #ffcd75; --mint: #2f9e58; --sky: #3b8fd9; --grape: #8a4fa0; --pink: #d95a8a; --orange: #ef7d57;
+  --bg: #1a1c2c; --card: #262b44; --surface: #262b44; --ink: #f4f4f4; --ink-soft: #94b0c2; --line: #3f4a70;
+  --edge: 3px; --hard: 4px 4px 0 #000000; --hard-sm: 3px 3px 0 #000000;
+  --shadow: 4px 4px 0 #000000; --radius: 0px; --radius-sm: 0px; --pill: 0px; --border-w: 3px;
+  --primary: #b13e53; --primary-edge: #000000; --danger: #ef7d57;
+  --accent: #73eff7; --accent-edge: #000000; --accent-soft: rgba(115, 239, 247, 0.14); --focus-ring: rgba(115, 239, 247, 0.25);
+  --highlight: #ffcd75; --highlight-edge: #000000; --highlight-ink: #1a1c2c;
+  --ok: #2f9e58; --ok-edge: #000000; --on-color: #ffffff;
+  --nav-bg: #0d0e17; --nav-ink: #f4f4f4; --toast-bg: #f4f4f4; --toast-ink: #1a1c2c; --toast-action: #b13e53; --tab-all: var(--primary);
+  --score: linear-gradient(90deg, #b13e53 0 33.4%, #ffcd75 33.4% 66.7%, #38b764 66.7%);
+  --good-ink: #a7f070; --warn-ink: #ffcd75; --bad-ink: #ff9b7a;
+  --tray-bg: transparent; --tray-line: #94b0c2; --over-bg: #1f3a33; --error-bg: #4a1f2b; --error-ink: #ffb3a6; --hint-bg: #3d3520;
+  --invite-bg: #ffcd75; --promo-bg: #29366f;
+  --signin-bg: repeating-conic-gradient(#1a1c2c 0 25%, #1f2236 0 50%) 0 0 / 32px 32px;
+  --font-head: 'Press Start 2P', monospace; --font-body: 'Pixelify Sans', system-ui, sans-serif;
+  --w-body: 400; --w-mid: 500; --w-strong: 600; --w-head: 400;
+  -webkit-font-smoothing: none;
 
-  /* Three stripes across the top of every screen. */
-  .app, .signin { background-image: linear-gradient(#d9541e 0 33.3%, #e9a820 33.3% 66.6%, #1f7a78 66.6%); background-size: 100% calc(var(--safe-t) + 12px); background-repeat: no-repeat; }
-  .signin { background-image: linear-gradient(#d9541e 0 33.3%, #e9a820 33.3% 66.6%, #1f7a78 66.6%), var(--signin-bg); background-size: 100% calc(var(--safe-t) + 12px), auto; }
-  .screen { padding-top: calc(var(--safe-t) + 28px); }
-  .hero { margin-top: calc(-28px - var(--safe-t)); border-bottom: 2.5px solid var(--ink); }
+  /* Nothing is round in 8-bit. */
+  *, *::before, *::after { border-radius: 0 !important; }
+  h1 { font-size: 22px; letter-spacing: 0; line-height: 1.5; text-transform: uppercase; text-shadow: 3px 3px 0 var(--primary); }
+  h2 { font-size: 15px; line-height: 1.6; text-transform: uppercase; }
+  h3 { font-size: 12px; line-height: 1.6; text-transform: uppercase; }
+  .signin h1 { font-size: 26px; text-shadow: 4px 4px 0 var(--primary); }
+  .celebration-card h1 { font-size: 22px; }
+  /* The display font is too wide for running text, so titles in lists use the body font. */
+  :is(.recipe-card .title, .week-card .body .t, .day-head) { font-family: var(--font-body); font-weight: 600; font-size: 18px; }
+  :is(.cat-head, .avatar, .steps .num) { font-size: 11px; }
+  .cat-head { padding: 7px 11px; text-transform: uppercase; }
+  .cat-head .count { font-family: var(--font-body); font-size: 14px; }
+  .stepper .value { font-size: 26px; }
+  .btn { text-transform: uppercase; letter-spacing: 0.04em; box-shadow: inset -4px -4px 0 rgba(0, 0, 0, 0.3), var(--hard); }
+  .btn.ghost { background: var(--surface); color: var(--ink); box-shadow: var(--hard); }
+  .btn.grape, .tabs .tab-pill { background: #3b5dc9; }
+  .btn:active, .btn.ghost:active { box-shadow: 1px 1px 0 #000000; }
+  .fab { font-family: var(--font-body); box-shadow: inset -4px -4px 0 rgba(0, 0, 0, 0.25), var(--hard); }
+  .check { border-width: 3px; background: var(--bg); }
+  .check.on { background: var(--ok); }
+  .cook-btn { background: var(--bg); }
+  .cook-btn.on { background: var(--ok); }
+  .label-tab .label-count { background: var(--bg); }
+  .field-tools-btns button, .staple-chip button { background: var(--bg); }
+  .item, .label-row { border-bottom: 3px solid var(--bg); }
+  .ing-list li { border-bottom: 3px dotted var(--line); }
+  .score-bar { background: rgba(0, 0, 0, 0.5); }
+  .hero { border-bottom: 3px solid var(--ink); }
   .hero::after { display: none; }
-  .detail-title { margin-top: 16px; }
-  h1 { font-size: 36px; letter-spacing: 0; text-shadow: 2.5px 2.5px 0 var(--highlight); }
-  .signin h1 { font-size: 52px; text-shadow: 4px 4px 0 var(--highlight); }
-  .recipe-card .title, .week-card .body .t { font-size: 17px; }
-  .check { border-width: 2.5px; }
-  .cat-head { padding: 5px 13px 5px 9px; }
-  .nav { box-shadow: 4px 4px 0 rgba(59, 35, 20, 0.3); }
-  .nav .badge { border: 2px solid var(--ink); }
-  .tabs .tab-pill { border: 2px solid var(--ink); }
+  .detail-title { margin-top: 18px; }
+  .nav { border: 3px solid var(--ink); box-shadow: var(--hard); height: 66px; padding: 5px; }
+  .nav .badge { border: 2px solid #000000; }
+  .backdrop { background: rgba(0, 0, 0, 0.65); }
+  .card.invite .btn { background: var(--primary); }
+  .meal-ghost .week-card { box-shadow: 8px 8px 0 #000000; }
+  .settings-dot { border-color: var(--bg); }
+  .celebration { background: rgba(13, 14, 23, 0.85); }
+  img { image-rendering: pixelated; }
 }
+
+/* Emoji redrawn as pixel art (Retro). Sized by the text around it. */
+.emo-px { width: 1em; height: 1em; vertical-align: -0.14em; image-rendering: pixelated; display: inline-block; }
 
 /* Emoji switch. Last so it wins over the display rules above. */
 .emo-alt { display: none; }

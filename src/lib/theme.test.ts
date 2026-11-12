@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { loadTheme, saveTheme, stripEmoji, themeInfo, THEMES } from './theme'
+import { loadTheme, saveTheme, splitEmoji, stripEmoji, themeInfo, THEMES } from './theme'
 
 describe('remembered theme', () => {
   afterEach(() => vi.unstubAllGlobals())
@@ -61,5 +61,23 @@ describe('stripEmoji', () => {
 
   it('leaves plain text, digits and punctuation alone', () => {
     expect(stripEmoji('Removed 2 lemons (ticked)')).toBe('Removed 2 lemons (ticked)')
+  })
+})
+
+describe('splitEmoji', () => {
+  it('separates emoji from the text around them', () => {
+    expect(splitEmoji('🛒 Ragu added 🎉')).toEqual([
+      { text: '🛒', emoji: true },
+      { text: ' Ragu added ', emoji: false },
+      { text: '🎉', emoji: true },
+    ])
+  })
+
+  it('keeps a joined emoji as one part', () => {
+    expect(splitEmoji('👩‍🍳 cooked')).toEqual([{ text: '👩‍🍳', emoji: true }, { text: ' cooked', emoji: false }])
+  })
+
+  it('returns plain text as a single part', () => {
+    expect(splitEmoji('Saved')).toEqual([{ text: 'Saved', emoji: false }])
   })
 })

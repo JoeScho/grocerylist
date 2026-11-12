@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties }
 import { Celebration } from '../components/Celebration'
 import { Check } from '../components/Check'
 import { useConfetti } from '../components/Confetti'
+import { Emoji } from '../components/Emoji'
 import { FieldTools } from '../components/FieldTools'
 import { RecipeImage } from '../components/RecipeImage'
 import { SettingsButton } from '../components/SettingsButton'
@@ -16,6 +17,8 @@ import { setCategoryOverride } from '../data/household'
 import { CATEGORIES, CATEGORY_BY_ID } from '../lib/categories'
 import { formatQty } from '../lib/ingredients'
 import { mealsOnShop, qtyStep, totalQty } from '../lib/list'
+import { pixelEmojiUrl } from '../lib/pixelEmoji'
+import { useTheme } from '../lib/theme'
 import type { Household, PlanEntry, Recipe, ShopItem } from '../types'
 import { Loading } from './Recipes'
 
@@ -132,7 +135,7 @@ export function Shop({
 
       {total === 0 ? (
         <motion.div className="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-          <motion.span className="big emo" animate={{ y: [0, -10, 0] }} transition={{ repeat: Infinity, duration: 1.8 }}>🛒</motion.span>
+          <motion.span className="big emo" animate={{ y: [0, -10, 0] }} transition={{ repeat: Infinity, duration: 1.8 }}><Emoji>🛒</Emoji></motion.span>
           <h2>Your list is empty</h2>
           <p className="subtle">Add recipes from the Recipes tab, or type items above.</p>
         </motion.div>
@@ -141,7 +144,7 @@ export function Shop({
           {groups.map(({ cat, items: list }) => (
             <motion.section className="cat" key={cat.id} layout>
               <motion.div className="cat-head" style={{ '--cat': cat.color } as CSSProperties} layout>
-                <span className="emo">{cat.emoji}</span> {cat.label}
+                <Emoji>{cat.emoji}</Emoji> {cat.label}
                 <span className="count">{list.filter(i => !i.checked).length}</span>
               </motion.div>
               <motion.div className="items" layout>
@@ -222,7 +225,7 @@ export function Shop({
                     toast(`${c.emoji} ${editing.name} will go in ${c.label} from now on`)
                   }}
                 >
-                  <span className="e">{c.emoji}</span>
+                  <span className="e"><Emoji>{c.emoji}</Emoji></span>
                   {c.label}
                 </motion.button>
               ))}
@@ -261,6 +264,8 @@ function Progress({ done, total }: { done: number; total: number }) {
   const r = 20
   const c = 2 * Math.PI * r
   const pct = total ? done / total : 0
+  const glyph = pct === 1 ? '🎉' : '🛒'
+  const pixel = useTheme().pixelEmoji ? pixelEmojiUrl(glyph) : null
   return (
     <div className="progress">
       <span className="subtle" style={{ fontWeight: 'var(--w-strong)' }}>{done}/{total}</span>
@@ -273,7 +278,9 @@ function Progress({ done, total }: { done: number; total: number }) {
           transform="rotate(-90 26 26)"
           transition={{ type: 'spring', damping: 20 }}
         />
-        <text className="emo" x="26" y="31" textAnchor="middle" fontSize="16">{pct === 1 ? '🎉' : '🛒'}</text>
+        {pixel
+          ? <image className="emo" href={pixel} x="17" y="17" width="18" height="18" style={{ imageRendering: 'pixelated' }} />
+          : <text className="emo" x="26" y="31" textAnchor="middle" fontSize="16">{glyph}</text>}
       </svg>
     </div>
   )

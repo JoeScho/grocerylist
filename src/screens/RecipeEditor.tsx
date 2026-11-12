@@ -1,6 +1,7 @@
 import { motion } from 'motion/react'
 import { useRef, useState } from 'react'
 import { labelColour } from '../components/LabelTabs'
+import { EmojiGlyph } from '../components/Emoji'
 import { FieldTools } from '../components/FieldTools'
 import { RecipeImage } from '../components/RecipeImage'
 import { fileToDataUrl } from '../lib/image'
@@ -83,7 +84,7 @@ export function RecipeEditor({
           </div>
         ) : (
           <button className="img-drop" onClick={() => fileInput.current?.click()}>
-            <span><span className="emo" style={{ fontSize: 40, display: 'block' }}>📷</span>Add a photo</span>
+            <span><span className="emo" style={{ fontSize: 40, display: 'block' }}><EmojiGlyph>📷</EmojiGlyph></span>Add a photo</span>
           </button>
         )}
       </div>

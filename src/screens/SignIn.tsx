@@ -1,6 +1,7 @@
 import { motion } from 'motion/react'
 import { useState } from 'react'
 import { signInWithPopup, signInWithRedirect } from 'firebase/auth'
+import { EmojiGlyph } from '../components/Emoji'
 import { auth, googleProvider } from '../firebase'
 
 const FLOATERS = [
@@ -39,7 +40,7 @@ export function SignIn() {
           animate={{ y: [0, -18, 0], rotate: [0, 10, -6, 0] }}
           transition={{ duration: 4, repeat: Infinity, delay: f.d, ease: 'easeInOut' }}
         >
-          {f.e}
+          <EmojiGlyph>{f.e}</EmojiGlyph>
         </motion.span>
       ))}
       <div>
@@ -49,7 +50,7 @@ export function SignIn() {
           animate={{ scale: 1, rotate: 0 }}
           transition={{ type: 'spring', stiffness: 260, damping: 12 }}
         >
-          🧺
+          <EmojiGlyph>🧺</EmojiGlyph>
         </motion.span>
         <motion.h1 initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.15 }}>
           Schoceries

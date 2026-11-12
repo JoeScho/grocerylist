@@ -2,7 +2,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import { useEffect } from 'react'
 import { useTheme } from '../lib/theme'
 import { DrawnTick } from './Confetti'
-import { Emoji } from './Emoji'
+import { Emoji, EmojiGlyph } from './Emoji'
 
 const RING_COLOURS = ['var(--sun)', 'var(--pink)', 'var(--sky)', 'var(--mint)']
 
@@ -81,7 +81,7 @@ export function Celebration({ show, onDone }: { show: boolean; onDone: () => voi
               animate={{ y: [0, -28, 0, -14, 0], rotate: [0, -12, 10, -6, 0] }}
               transition={{ duration: 1.2, delay: 0.3, repeat: 2, repeatDelay: 0.3 }}
             >
-              🧺
+              <EmojiGlyph>🧺</EmojiGlyph>
             </motion.span>
             <motion.h1 initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
               Shop done!
